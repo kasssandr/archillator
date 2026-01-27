@@ -1,4 +1,4 @@
-# ARCILLATOR
+# ARCHILLATOR
 A browser-based translation tool for academic texts, designed for researchers and humanities scholars who need to translate books, articles, and documents while preserving formatting and ensuring accurate scholarly terminology.
 
 **Part of the [Archilles](https://archilles.org) project.**
