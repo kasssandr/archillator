@@ -17,7 +17,7 @@ A browser-based translation tool for academic texts, designed for researchers an
 
 ## Quick Start
 
-1. Open `academic-text-translator.html` in any modern browser
+1. Open `archillator.html` in any modern browser
 2. Enter your API key (Gemini, OpenAI, and/or Anthropic)
 3. Choose your target language and style
 4. Either paste text (Passage mode, Proofread mode) or upload a file (Document mode)
