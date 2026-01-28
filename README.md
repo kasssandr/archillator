@@ -31,6 +31,7 @@ A browser-based translation tool for academic texts, designed for researchers an
 - **Gemini 3 Pro** – Best quality from Google
 
 **Free tier available:** Gemini offers generous free usage limits, making it ideal for testing and smaller projects.
+**Note:** Gemini's free tier may use your data for model training. For sensitive content, use the paid tier or another provider.
 
 ### OpenAI
 - **GPT-4o Mini** – Fast and cheap (~$0.02 per 100k chars)
