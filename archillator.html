@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCHILLATOR</title>
+    <title>ARCHILLATOR – Academic Text Translator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
     <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
     <script src="https://unpkg.com/docx@8.5.0/build/index.umd.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        .logo-font {
+            font-family: 'Courier Prime', monospace;
+            letter-spacing: 0.05em;
+        }
         .copy-feedback {
             animation: fadeOut 2s forwards;
         }
@@ -115,8 +120,8 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
     <div class="max-w-6xl mx-auto">
-        <h1 class="text-2xl font-bold text-gray-800 mb-1">Academic Text Translator</h1>
-        <p class="text-gray-600 mb-4">Translate academic texts or fix spelling via Gemini, OpenAI, or Claude APIs.</p>
+        <h1 class="logo-font text-3xl font-bold text-gray-800 mb-1">ARCHILLATOR</h1>
+        <p class="text-gray-600 mb-4">Translate academic texts or fix spelling via Gemini, OpenAI, or Claude APIs. <a href="https://archilles.org" class="text-blue-600 hover:underline">Part of ARCHILLES</a></p>
 
         <!-- Mode Tabs -->
         <div class="flex border-b border-gray-300 mb-4">
