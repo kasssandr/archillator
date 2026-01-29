@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARCHILLATOR – Academic Text Translator</title>
+    <title>ARCHILLATOR - Academic Text Translator</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/mammoth@1.6.0/mammoth.browser.min.js"></script>
     <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
@@ -120,7 +120,7 @@
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
     <div class="max-w-6xl mx-auto">
-        <h1 class="logo-font text-3xl font-bold text-gray-800 mb-1">ARCHILLATOR</h1>
+        <h1 class="text-2xl font-bold text-gray-800 mb-1 logo-font">ARCHILLATOR</h1>
         <p class="text-gray-600 mb-4">Translate academic texts or fix spelling via Gemini, OpenAI, or Claude APIs. <a href="https://archilles.org" class="text-blue-600 hover:underline">Part of ARCHILLES</a></p>
 
         <!-- Mode Tabs -->
@@ -165,18 +165,20 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Gemini API Key</label>
                     <input type="password" id="geminiApiKey" placeholder="AIza..." 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-600 hover:underline">Get key →</a>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-600 hover:underline">Get API key →</a>
                 </div>
-                <div class="w-52">
+                <div class="w-64">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
                     <select id="geminiModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="gemini-3-flash-preview">Gemini 3 Flash (fastest)</option>
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (fast, cheap)</option>
-                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-                        <option value="gemini-3-pro-preview">Gemini 3 Pro (best quality)</option>
-                        <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                        <optgroup label="Gemini 3 Series (latest)">
+                            <option value="gemini-3-flash-preview">Gemini 3 Flash (fastest)</option>
+                            <option value="gemini-3-pro-preview">Gemini 3 Pro (best quality)</option>
+                        </optgroup>
+                        <optgroup label="Gemini 2.5 Series (stable)">
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash (fast, cheap)</option>
+                            <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                        </optgroup>
                     </select>
-                    <span class="text-xs text-gray-400">&nbsp;</span>
                 </div>
             </div>
 
@@ -186,16 +188,22 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">OpenAI API Key</label>
                     <input type="password" id="openaiApiKey" placeholder="sk-..." 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <a href="https://platform.openai.com/api-keys" target="_blank" class="text-xs text-green-600 hover:underline">Get key →</a>
+                    <a href="https://platform.openai.com/api-keys" target="_blank" class="text-xs text-green-600 hover:underline">Get API key →</a>
                 </div>
-                <div class="w-52">
+                <div class="w-64">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
                     <select id="openaiModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="gpt-4o-mini">GPT-4o Mini (fast, cheap)</option>
-                        <option value="gpt-4o">GPT-4o (best quality)</option>
-                        <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                        <optgroup label="GPT-5 Series (latest)">
+                            <option value="gpt-5-mini">GPT-5 Mini (fast, efficient)</option>
+                            <option value="gpt-5.1">GPT-5.1 (balanced)</option>
+                            <option value="gpt-5.2">GPT-5.2 (best quality)</option>
+                        </optgroup>
+                        <optgroup label="GPT-4 Series">
+                            <option value="gpt-4o-mini">GPT-4o Mini (fast, cheap)</option>
+                            <option value="gpt-4o">GPT-4o</option>
+                            <option value="gpt-4.1">GPT-4.1</option>
+                        </optgroup>
                     </select>
-                    <span class="text-xs text-gray-400">&nbsp;</span>
                 </div>
             </div>
 
@@ -205,16 +213,21 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Anthropic API Key</label>
                     <input type="password" id="anthropicApiKey" placeholder="sk-ant-..." 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    <a href="https://console.anthropic.com/settings/keys" target="_blank" class="text-xs text-orange-600 hover:underline">Get key →</a>
+                    <a href="https://console.anthropic.com/settings/keys" target="_blank" class="text-xs text-orange-600 hover:underline">Get API key →</a>
                 </div>
-                <div class="w-52">
+                <div class="w-64">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
                     <select id="anthropicModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        <option value="claude-sonnet-4-20250514">Claude Sonnet 4 (balanced)</option>
-                        <option value="claude-3-5-haiku-20241022">Claude 3.5 Haiku (fast, cheap)</option>
-                        <option value="claude-opus-4-20250514">Claude Opus 4 (best quality)</option>
+                        <optgroup label="Claude 4.5 Series (latest)">
+                            <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (fast, cheap)</option>
+                            <option value="claude-sonnet-4-5-20250929">Claude Sonnet 4.5 (balanced)</option>
+                            <option value="claude-opus-4-5-20251124">Claude Opus 4.5 (best quality)</option>
+                        </optgroup>
+                        <optgroup label="Claude 4 Series">
+                            <option value="claude-sonnet-4-20250514">Claude Sonnet 4</option>
+                            <option value="claude-opus-4-20250514">Claude Opus 4</option>
+                        </optgroup>
                     </select>
-                    <span class="text-xs text-gray-400">&nbsp;</span>
                 </div>
             </div>
 
@@ -374,9 +387,10 @@ Use double line breaks (empty line) to preserve paragraphs."
                 <div id="resumePrompt" class="hidden mt-4 p-4 bg-yellow-50 border border-yellow-300 rounded-lg">
                     <p class="font-medium text-yellow-800">Unfinished translation found!</p>
                     <p class="text-sm text-yellow-700 mt-1" id="resumeInfo">File: example.docx • 45/120 paragraphs completed</p>
+                    <p class="text-sm text-yellow-600 mt-1" id="resumeProviderInfo"></p>
                     <div class="flex gap-2 mt-3">
                         <button onclick="resumeTranslation()" class="bg-yellow-600 text-white px-4 py-2 rounded hover:bg-yellow-700">
-                            Resume
+                            Resume with current provider
                         </button>
                         <button onclick="discardCheckpoint()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
                             Discard & Start Fresh
@@ -392,9 +406,9 @@ Use double line breaks (empty line) to preserve paragraphs."
                     Upload a DOCX, EPUB, or TXT file. The text will be split into chunks and translated paragraph by paragraph.
                     Progress is saved automatically – if the browser closes, you can resume later.
                     <br><br>
-                    <strong>Output formats:</strong> DOCX/EPUB → DOCX (use Calibre to convert back to EPUB) • TXT → TXT
+                    <strong>Output formats:</strong> EPUB → EPUB (formatting preserved) • DOCX → DOCX • TXT → TXT
                     <br>
-                    <strong>Tip:</strong> For PDFs, convert to DOCX or EPUB first (e.g., using Calibre).
+                    <strong>Tip:</strong> For PDFs, convert to EPUB first (e.g., using Calibre) for best results.
                 </p>
             </div>
         </div>
@@ -501,7 +515,7 @@ Works great for:
 
         <!-- Footer -->
         <div class="text-center text-gray-400 text-sm mt-6">
-            Part of the <a href="https://archilles.org" class="text-blue-500 hover:underline">Archilles</a> project
+            Part of the <a href="https://archilles.org" class="text-blue-500 hover:underline">ARCHILLES</a> project
         </div>
     </div>
 
@@ -534,6 +548,7 @@ Works great for:
         let currentFileName = null;
         let originalDocxZip = null;
         let originalEpubZip = null;
+        let epubTextNodes = []; // Stores {filePath, nodeIndex, text} for EPUB reconstruction
         let isTranslating = false;
         let shouldStop = false;
 
@@ -907,7 +922,6 @@ ${text}`;
             currentFileName = file.name;
             currentFileType = ext;
             documentParagraphs = [];
-            translatedParagraphs = [];
 
             document.getElementById('fileName').textContent = file.name;
             document.getElementById('fileInfo').classList.remove('hidden');
@@ -923,8 +937,60 @@ ${text}`;
                 }
 
                 const totalChars = documentParagraphs.reduce((sum, p) => sum + p.length, 0);
-                document.getElementById('fileStats').textContent = 
-                    `${documentParagraphs.length} paragraphs • ${totalChars.toLocaleString()} characters`;
+                
+                // Check if we have a pending resume from a checkpoint
+                if (window.pendingResume && window.pendingResume.fileName === file.name) {
+                    const checkpoint = window.pendingResume;
+                    const paragraphCount = checkpoint.paragraphCount || 0;
+                    
+                    // Verify paragraph count matches (roughly)
+                    if (Math.abs(documentParagraphs.length - paragraphCount) <= 10) {
+                        // Restore translated paragraphs from checkpoint
+                        if (typeof checkpoint.translated === 'object' && !Array.isArray(checkpoint.translated)) {
+                            translatedParagraphs = new Array(documentParagraphs.length).fill(null);
+                            for (const [idx, text] of Object.entries(checkpoint.translated)) {
+                                translatedParagraphs[parseInt(idx)] = text;
+                            }
+                        } else {
+                            translatedParagraphs = checkpoint.translated || new Array(documentParagraphs.length).fill(null);
+                        }
+                        
+                        const alreadyDone = Object.keys(checkpoint.translated || {}).length;
+                        document.getElementById('fileStats').textContent = 
+                            `${documentParagraphs.length} paragraphs • ${totalChars.toLocaleString()} characters • ${alreadyDone} already translated`;
+                        
+                        // Restore settings
+                        if (checkpoint.targetLang) {
+                            document.getElementById('targetLang').value = checkpoint.targetLang;
+                        }
+                        if (checkpoint.blankLines !== undefined) {
+                            document.getElementById('blankLines').checked = checkpoint.blankLines;
+                        }
+                        
+                        // Show resume info in log area
+                        document.getElementById('progressSection').classList.remove('hidden');
+                        logChunk(`📂 File loaded. Found ${alreadyDone} translated paragraphs from checkpoint.`);
+                        logChunk(`▶️ Click "Start Translation" to continue from paragraph ${checkpoint.completedCount}`);
+                        
+                        // Store the start index for when translation begins
+                        window.resumeFromIndex = checkpoint.completedCount;
+                        
+                    } else {
+                        // Paragraph count mismatch - might be different file
+                        console.warn(`Paragraph count mismatch: checkpoint has ${paragraphCount}, file has ${documentParagraphs.length}`);
+                        translatedParagraphs = new Array(documentParagraphs.length).fill(null);
+                        document.getElementById('fileStats').textContent = 
+                            `${documentParagraphs.length} paragraphs • ${totalChars.toLocaleString()} characters`;
+                    }
+                    
+                    window.pendingResume = null; // Clear pending resume
+                } else {
+                    // Normal load - no pending resume
+                    translatedParagraphs = new Array(documentParagraphs.length).fill(null);
+                    document.getElementById('fileStats').textContent = 
+                        `${documentParagraphs.length} paragraphs • ${totalChars.toLocaleString()} characters`;
+                    window.resumeFromIndex = null;
+                }
                 
                 updateCostEstimate(totalChars);
                 document.getElementById('startTranslationBtn').disabled = false;
@@ -949,23 +1015,61 @@ ${text}`;
         async function loadEpub(file) {
             const arrayBuffer = await file.arrayBuffer();
             originalEpubZip = await JSZip.loadAsync(arrayBuffer);
+            epubTextNodes = [];
+            documentParagraphs = [];
             
-            // Find content files (usually in OEBPS or similar)
-            const textContent = [];
-            
+            // Find and process content files
+            const htmlFiles = [];
             for (const [path, zipEntry] of Object.entries(originalEpubZip.files)) {
                 if (path.endsWith('.xhtml') || path.endsWith('.html') || path.endsWith('.htm')) {
-                    const content = await zipEntry.async('string');
-                    // Simple HTML to text conversion
-                    const div = document.createElement('div');
-                    div.innerHTML = content;
-                    const text = div.textContent || div.innerText;
-                    const paragraphs = text.split('\n').filter(p => p.trim());
-                    textContent.push(...paragraphs);
+                    htmlFiles.push({ path, zipEntry });
                 }
             }
             
-            documentParagraphs = textContent;
+            // Sort by path to ensure consistent ordering
+            htmlFiles.sort((a, b) => a.path.localeCompare(b.path));
+            
+            for (const { path, zipEntry } of htmlFiles) {
+                const content = await zipEntry.async('string');
+                
+                // Parse HTML - try XHTML first, fall back to HTML
+                const parser = new DOMParser();
+                let doc = parser.parseFromString(content, 'application/xhtml+xml');
+                
+                // Check for parse errors
+                const parseError = doc.querySelector('parsererror');
+                if (parseError) {
+                    // Fallback to HTML parser
+                    doc = parser.parseFromString(content, 'text/html');
+                }
+                
+                // Walk through all text-containing elements
+                const textElements = doc.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, th, blockquote, figcaption');
+                
+                let nodeIndex = 0;
+                for (const elem of textElements) {
+                    const text = elem.textContent.trim();
+                    
+                    if (text && text.length > 0) {
+                        // Store reference for later reconstruction
+                        epubTextNodes.push({
+                            filePath: path,
+                            originalText: text,
+                            nodeIndex: nodeIndex
+                        });
+                        documentParagraphs.push(text);
+                        nodeIndex++;
+                    }
+                }
+            }
+            
+            console.log(`EPUB loaded: ${documentParagraphs.length} paragraphs from ${htmlFiles.length} files`);
+        }
+        
+        function getElementSelector(elem, index) {
+            // Create a simple selector based on tag and position
+            const tag = elem.tagName.toLowerCase();
+            return `${tag}:nth-of-type-text(${index})`;
         }
 
         async function loadTxt(file) {
@@ -986,24 +1090,31 @@ ${text}`;
             
             // Rough cost estimates per 1M characters (input + output)
             const costs = {
+                // Gemini
                 'gemini-3-flash-preview': 0.15,
-                'gemini-2.5-flash': 0.20,
-                'gemini-2.0-flash': 0.20,
                 'gemini-3-pro-preview': 2.50,
+                'gemini-2.5-flash': 0.20,
                 'gemini-2.5-pro': 3.50,
+                // OpenAI
+                'gpt-5-mini': 0.30,
+                'gpt-5.1': 3.00,
+                'gpt-5.2': 4.00,
                 'gpt-4o-mini': 0.20,
                 'gpt-4o': 3.00,
-                'gpt-4-turbo': 12.00,
-                'claude-3-5-haiku-20241022': 0.40,
-                'claude-sonnet-4-20250514': 1.50,
-                'claude-opus-4-20250514': 7.50
+                'gpt-4.1': 3.50,
+                // Claude
+                'claude-haiku-4-5-20251001': 0.60,
+                'claude-sonnet-4-5-20250929': 1.80,
+                'claude-opus-4-5-20251124': 3.00,
+                'claude-sonnet-4-20250514': 1.80,
+                'claude-opus-4-20250514': 9.00
             };
             
             const costPer1M = costs[model] || 0.50;
             const estimated = (chars / 1000000) * costPer1M * 2; // *2 for input+output
             
             document.getElementById('costText').textContent = 
-                `~$${estimated.toFixed(3)} with ${model} (very rough estimate)`;
+                `~$${estimated.toFixed(3)} (rough estimate)`;
         }
 
         function clearDocument() {
@@ -1013,6 +1124,7 @@ ${text}`;
             currentFileType = null;
             originalDocxZip = null;
             originalEpubZip = null;
+            epubTextNodes = [];
             
             document.getElementById('fileInput').value = '';
             document.getElementById('fileInfo').classList.add('hidden');
@@ -1048,14 +1160,26 @@ ${text}`;
 
             isTranslating = true;
             shouldStop = false;
-            translatedParagraphs = new Array(documentParagraphs.length).fill(null);
+            
+            // Check if we're resuming from a checkpoint (after file re-upload)
+            let startIndex = 0;
+            if (window.resumeFromIndex !== null && window.resumeFromIndex !== undefined) {
+                startIndex = window.resumeFromIndex;
+                // Don't reset translatedParagraphs - they were restored from checkpoint
+                logChunk(`▶️ Resuming from paragraph ${startIndex} with ${providerName}`);
+                window.resumeFromIndex = null; // Clear so next start is fresh
+            } else {
+                // Fresh start - reset translated paragraphs
+                translatedParagraphs = new Array(documentParagraphs.length).fill(null);
+            }
 
             document.getElementById('startTranslationBtn').classList.add('hidden');
             document.getElementById('stopTranslationBtn').classList.remove('hidden');
             document.getElementById('progressSection').classList.remove('hidden');
-            document.getElementById('chunkStatus').innerHTML = '';
+            if (startIndex === 0) {
+                document.getElementById('chunkStatus').innerHTML = '';
+            }
 
-            const startIndex = 0;
             await translateDocument(apiKey, startIndex);
         }
 
@@ -1278,6 +1402,13 @@ ${text}`;
                 const paragraphCount = checkpoint.paragraphCount || checkpoint.paragraphs?.length || 0;
                 document.getElementById('resumeInfo').textContent = 
                     `File: ${checkpoint.fileName} • ${checkpoint.completedCount}/${paragraphCount} paragraphs completed`;
+                
+                // Show original provider info
+                const providerNames = { gemini: 'Gemini', openai: 'OpenAI', anthropic: 'Claude' };
+                const originalProvider = providerNames[checkpoint.provider] || checkpoint.provider;
+                document.getElementById('resumeProviderInfo').textContent = 
+                    `Started with: ${originalProvider} • You can switch providers above before resuming`;
+                
                 document.getElementById('resumePrompt').classList.remove('hidden');
                 
                 // Switch to document mode
@@ -1338,28 +1469,41 @@ ${text}`;
                 
                 document.getElementById('fileName').textContent = checkpoint.fileName;
                 document.getElementById('fileInfo').classList.remove('hidden');
-                document.getElementById('fileStats').textContent = 
-                    `${documentParagraphs.length} paragraphs • Resuming from ${checkpoint.completedCount}`;
+                
+                // Show info about provider switch if different
+                const providerNames = { gemini: 'Gemini', openai: 'OpenAI', anthropic: 'Claude' };
+                let statusText = `${documentParagraphs.length} paragraphs • Resuming from ${checkpoint.completedCount}`;
+                if (checkpoint.provider !== currentProvider) {
+                    statusText += ` • Switching from ${providerNames[checkpoint.provider]} to ${providerNames[currentProvider]}`;
+                }
+                document.getElementById('fileStats').textContent = statusText;
+                
                 document.getElementById('resumePrompt').classList.add('hidden');
                 document.getElementById('targetLang').value = checkpoint.targetLang;
                 if (checkpoint.blankLines !== undefined) {
                     document.getElementById('blankLines').checked = checkpoint.blankLines;
                 }
                 
-                selectProvider(checkpoint.provider);
+                // DON'T switch provider - use the currently selected one!
+                // This allows users to switch providers mid-translation (e.g., if rate limited)
+                // selectProvider(checkpoint.provider);  // REMOVED
                 
-                // Start from where we left off
+                // Use the currently selected provider's API key
                 let apiKey;
+                let providerName;
                 if (currentProvider === 'gemini') {
                     apiKey = geminiKeyInput.value.trim();
+                    providerName = 'Gemini';
                 } else if (currentProvider === 'openai') {
                     apiKey = openaiKeyInput.value.trim();
+                    providerName = 'OpenAI';
                 } else {
                     apiKey = anthropicKeyInput.value.trim();
+                    providerName = 'Claude';
                 }
                     
                 if (!apiKey) {
-                    alert('Please enter your API key first, then click Resume again.');
+                    alert(`Please enter your ${providerName} API key first, then click Resume again.`);
                     document.getElementById('startTranslationBtn').disabled = false;
                     return;
                 }
@@ -1370,6 +1514,8 @@ ${text}`;
                 document.getElementById('startTranslationBtn').classList.add('hidden');
                 document.getElementById('stopTranslationBtn').classList.remove('hidden');
                 document.getElementById('progressSection').classList.remove('hidden');
+                
+                logChunk(`▶️ Resuming with ${providerName} from paragraph ${checkpoint.completedCount}`);
                 
                 translateDocument(apiKey, checkpoint.completedCount);
                 
@@ -1395,9 +1541,132 @@ ${text}`;
             if (currentFileType === 'txt') {
                 // TXT input → TXT output
                 downloadAsTxt(paragraphs, baseName, targetLang);
+            } else if (currentFileType === 'epub' && originalEpubZip && epubTextNodes.length > 0) {
+                // EPUB input → EPUB output with preserved formatting
+                await downloadAsEpub(baseName, targetLang);
             } else {
-                // DOCX or EPUB input → DOCX output
+                // DOCX input → DOCX output
                 await downloadAsDocx(paragraphs, baseName, targetLang);
+            }
+        }
+        
+        async function downloadAsEpub(baseName, targetLang) {
+            // Clone the original EPUB
+            const newZip = new JSZip();
+            
+            // Copy all files from original
+            for (const [path, zipEntry] of Object.entries(originalEpubZip.files)) {
+                if (zipEntry.dir) {
+                    newZip.folder(path);
+                } else {
+                    const content = await zipEntry.async('arraybuffer');
+                    newZip.file(path, content);
+                }
+            }
+            
+            // Group text nodes by file
+            const nodesByFile = {};
+            epubTextNodes.forEach((node, index) => {
+                if (!nodesByFile[node.filePath]) {
+                    nodesByFile[node.filePath] = [];
+                }
+                nodesByFile[node.filePath].push({
+                    ...node,
+                    translatedText: translatedParagraphs[index] || node.originalText
+                });
+            });
+            
+            // Process each HTML file
+            for (const [filePath, nodes] of Object.entries(nodesByFile)) {
+                const originalContent = await originalEpubZip.file(filePath).async('string');
+                const translatedContent = replaceTextInHtml(originalContent, nodes);
+                newZip.file(filePath, translatedContent);
+            }
+            
+            // Generate and download
+            const blob = await newZip.generateAsync({ 
+                type: 'blob',
+                mimeType: 'application/epub+zip',
+                compression: 'DEFLATE'
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${baseName}_${targetLang}.epub`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function replaceTextInHtml(htmlContent, nodes) {
+            // Parse the HTML
+            const parser = new DOMParser();
+            let doc = parser.parseFromString(htmlContent, 'application/xhtml+xml');
+            
+            // Check for parse errors, fall back to HTML
+            const parseError = doc.querySelector('parsererror');
+            if (parseError) {
+                doc = parser.parseFromString(htmlContent, 'text/html');
+            }
+            
+            // Find all text-containing elements
+            const textElements = doc.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, td, th, blockquote, figcaption');
+            
+            let nodeIndex = 0;
+            for (const elem of textElements) {
+                const text = elem.textContent.trim();
+                if (text && text.length > 0) {
+                    // Find matching node
+                    const matchingNode = nodes.find(n => n.nodeIndex === nodeIndex);
+                    if (matchingNode && matchingNode.translatedText) {
+                        // Replace text content while preserving child element structure
+                        replaceTextContent(elem, matchingNode.originalText, matchingNode.translatedText);
+                    }
+                    nodeIndex++;
+                }
+            }
+            
+            // Serialize back to string
+            const serializer = new XMLSerializer();
+            return serializer.serializeToString(doc);
+        }
+        
+        function replaceTextContent(element, originalText, translatedText) {
+            // If element has no child elements, simply replace text
+            if (element.children.length === 0) {
+                element.textContent = translatedText;
+                return;
+            }
+            
+            // For elements with mixed content (text + child elements like <em>, <strong>),
+            // we need to be more careful. For now, replace all text content.
+            // This may lose some inline formatting, but preserves block structure.
+            
+            // Simple approach: if the text content matches, replace it
+            const currentText = element.textContent.trim();
+            if (currentText === originalText.trim()) {
+                // Walk through child nodes and replace text nodes
+                const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null, false);
+                const textNodes = [];
+                let node;
+                while (node = walker.nextNode()) {
+                    if (node.textContent.trim()) {
+                        textNodes.push(node);
+                    }
+                }
+                
+                if (textNodes.length === 1) {
+                    // Single text node - easy replacement
+                    textNodes[0].textContent = translatedText;
+                } else if (textNodes.length > 1) {
+                    // Multiple text nodes - put all translated text in first, clear others
+                    textNodes[0].textContent = translatedText;
+                    for (let i = 1; i < textNodes.length; i++) {
+                        textNodes[i].textContent = '';
+                    }
+                }
             }
         }
         
