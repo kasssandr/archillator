@@ -331,10 +331,10 @@ Use double line breaks (empty line) to preserve paragraphs."
                 <!-- File Upload -->
                 <div id="dropZone" class="drop-zone rounded-lg p-8 text-center cursor-pointer"
                     onclick="document.getElementById('fileInput').click()">
-                    <input type="file" id="fileInput" accept=".docx,.epub,.txt" class="hidden" onchange="handleFileSelect(event)">
+                    <input type="file" id="fileInput" accept=".docx,.epub,.txt,.md" class="hidden" onchange="handleFileSelect(event)">
                     <div class="text-4xl mb-2">📁</div>
                     <p class="text-gray-600 font-medium">Drop file here or click to select</p>
-                    <p class="text-gray-400 text-sm mt-1">Supported: DOCX, EPUB, TXT</p>
+                    <p class="text-gray-400 text-sm mt-1">Supported: DOCX, EPUB, TXT, MD</p>
                 </div>
 
                 <!-- File Info -->
@@ -403,10 +403,10 @@ Use double line breaks (empty line) to preserve paragraphs."
             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <h3 class="font-medium text-blue-800 mb-2">Document Translation</h3>
                 <p class="text-sm text-blue-700">
-                    Upload a DOCX, EPUB, or TXT file. The text will be split into chunks and translated paragraph by paragraph.
+                    Upload a DOCX, EPUB, TXT, or MD file. The text will be split into chunks and translated paragraph by paragraph.
                     Progress is saved automatically – if the browser closes, you can resume later.
                     <br><br>
-                    <strong>Output formats:</strong> EPUB → EPUB (formatting preserved) • DOCX → DOCX • TXT → TXT
+                    <strong>Output formats:</strong> EPUB → EPUB (formatting preserved) • DOCX → DOCX • TXT → TXT • MD → MD
                     <br>
                     <strong>Tip:</strong> For PDFs, convert to EPUB first (e.g., using Calibre) for best results.
                 </p>
@@ -914,8 +914,8 @@ ${text}`;
 
         async function handleFile(file) {
             const ext = file.name.split('.').pop().toLowerCase();
-            if (!['docx', 'epub', 'txt'].includes(ext)) {
-                alert('Unsupported file format. Please use DOCX, EPUB, or TXT.');
+            if (!['docx', 'epub', 'txt', 'md'].includes(ext)) {
+                alert('Unsupported file format. Please use DOCX, EPUB, TXT, or MD.');
                 return;
             }
 
@@ -932,6 +932,8 @@ ${text}`;
                     await loadDocx(file);
                 } else if (ext === 'epub') {
                     await loadEpub(file);
+                } else if (ext === 'md') {
+                    await loadMd(file);
                 } else {
                     await loadTxt(file);
                 }
@@ -1076,6 +1078,13 @@ ${text}`;
             const text = await file.text();
             // For TXT, use double line breaks as paragraph separators
             documentParagraphs = text.split(/\n\s*\n/).map(p => p.replace(/\n/g, ' ').trim()).filter(p => p);
+        }
+
+        async function loadMd(file) {
+            const text = await file.text();
+            // Split on double line breaks; preserve Markdown syntax (headings, lists, etc.)
+            // so the model can keep the markers intact during translation
+            documentParagraphs = text.split(/\n\s*\n/).map(p => p.trim()).filter(p => p);
         }
 
         function updateCostEstimate(chars) {
@@ -1541,6 +1550,9 @@ ${text}`;
             if (currentFileType === 'txt') {
                 // TXT input → TXT output
                 downloadAsTxt(paragraphs, baseName, targetLang);
+            } else if (currentFileType === 'md') {
+                // MD input → MD output (Markdown syntax preserved)
+                downloadAsMd(paragraphs, baseName, targetLang);
             } else if (currentFileType === 'epub' && originalEpubZip && epubTextNodes.length > 0) {
                 // EPUB input → EPUB output with preserved formatting
                 await downloadAsEpub(baseName, targetLang);
@@ -1684,6 +1696,20 @@ ${text}`;
             URL.revokeObjectURL(url);
         }
         
+        function downloadAsMd(paragraphs, baseName, targetLang) {
+            const text = paragraphs.join('\n\n');
+            const blob = new Blob([text], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${baseName}_${targetLang}.md`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
         async function downloadAsDocx(paragraphs, baseName, targetLang) {
             const { Document, Packer, Paragraph, TextRun } = docx;
             
