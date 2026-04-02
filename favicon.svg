@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Dark navy background -->
+  <rect width="100" height="100" fill="#0d1b2e" rx="12"/>
+
+  <!-- Helmet outer silhouette (Zahn ends at y=78, cheeks at y=87) -->
+  <path d="
+    M50 8
+    C34 8, 18 20, 16 40
+    L16 60
+    C16 66, 20 70, 25 71
+    L25 80
+    C25 84, 28 87, 31 87
+    L39 87
+    L39 71
+    L45 71
+    L45 78
+    L55 78
+    L55 71
+    L61 71
+    L61 87
+    L69 87
+    C72 87, 75 84, 75 80
+    L75 71
+    C80 70, 84 66, 84 60
+    L84 40
+    C82 20, 66 8, 50 8 Z
+  " fill="rgba(0,212,255,0.07)" stroke="#00d4ff" stroke-width="2.2" stroke-linejoin="round"/>
+
+  <!-- Face opening: ONE connected shape — butterfly top (two eye arches meeting at nasal bridge),
+       open on both sides of the Zahn at the bottom.
+       Filled with background color to punch out the face area. -->
+  <path d="
+    M 19 71
+    L 19 50
+    C 19 28, 42 20, 50 36
+    C 58 20, 81 28, 81 50
+    L 81 71
+    L 61 71
+    L 55 71
+    L 55 78
+    L 45 78
+    L 45 71
+    L 39 71
+    Z
+  " fill="#0d1b2e" stroke="none"/>
+
+  <!-- Stroke only the top butterfly arch (eye boundary) -->
+  <path d="
+    M 19 71
+    L 19 50
+    C 19 28, 42 20, 50 36
+    C 58 20, 81 28, 81 50
+    L 81 71
+  " fill="none" stroke="#00d4ff" stroke-width="1.8" stroke-linejoin="round"/>
+
+  <!-- Dome crest: vertical line from top down to nasal bridge -->
+  <line x1="50" y1="18" x2="50" y2="36" stroke="#00d4ff" stroke-width="2"/>
+
+  <!-- Glow dots at structural joints -->
+  <circle cx="25" cy="71" r="2" fill="#00d4ff"/>
+  <circle cx="75" cy="71" r="2" fill="#00d4ff"/>
+  <circle cx="50" cy="8"  r="2" fill="#00d4ff"/>
+</svg>
