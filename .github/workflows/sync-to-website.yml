@@ -1,0 +1,40 @@
+name: Sync Archillator to archilles.org
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'archillator.html'
+      - 'favicon.svg'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout archillator repo
+        uses: actions/checkout@v4
+
+      - name: Checkout archilles.org repo
+        uses: actions/checkout@v4
+        with:
+          repository: kasssandr/archilles.org
+          token: ${{ secrets.WEBSITE_SYNC_TOKEN }}
+          path: website
+
+      - name: Copy files
+        run: |
+          cp archillator.html website/archillator/index.html
+          cp favicon.svg website/archillator/favicon.svg
+
+      - name: Commit and push
+        run: |
+          cd website
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add archillator/
+          if git diff --staged --quiet; then
+            echo "No changes to sync"
+          else
+            git commit -m "Sync archillator from source repo"
+            git push
+          fi
