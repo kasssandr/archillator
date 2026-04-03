@@ -7,7 +7,7 @@ A browser-based translation tool for academic texts, designed for researchers an
 
 - **Three Translation Providers:** Google Gemini, OpenAI GPT, and Anthropic Claude
 - **Three Modes:** Passage mode for quick translations, Document mode for entire files, Proofread mode for spelling correction
-- **Multiple Input Formats:** DOCX, EPUB, TXT
+- **Multiple Input Formats:** DOCX, EPUB, TXT, Markdown (.md)
 - **Smart Output:** DOCX/EPUB inputs produce DOCX output (easy Calibre conversion back to EPUB)
 - **Checkpoint System:** Automatic progress saving – resume interrupted translations
 - **Batch Processing:** Translates multiple paragraphs per API call for efficiency
@@ -113,7 +113,7 @@ For quick translations of text copied from PDFs or other sources.
 For translating entire books and documents.
 
 **Features:**
-- Upload DOCX, EPUB, or TXT files
+- Upload DOCX, EPUB, TXT, or Markdown files
 - Batch processing (10 paragraphs per API call for efficiency)
 - Automatic checkpoint saving (resume after interruption)
 - Progress tracking with detailed log
@@ -123,6 +123,7 @@ For translating entire books and documents.
 - DOCX input → DOCX output
 - EPUB input → DOCX output (convert back to EPUB with Calibre)
 - TXT input → TXT output
+- Markdown input → Markdown output (preserves formatting syntax)
 
 **Best for:** Books, articles, long documents
 
