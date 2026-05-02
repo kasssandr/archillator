@@ -5,7 +5,7 @@ A browser-based translation tool for academic texts, designed for researchers an
 
 ## Features
 
-- **Three Translation Providers:** Google Gemini, OpenAI GPT, and Anthropic Claude
+- **Four Translation Providers:** Google Gemini, OpenAI GPT, Anthropic Claude, and Ollama (local, free)
 - **Three Modes:** Passage mode for quick translations, Document mode for entire files, Proofread mode for spelling correction
 - **Multiple Input Formats:** DOCX, EPUB, TXT, Markdown (.md)
 - **Smart Output:** DOCX/EPUB inputs produce DOCX output (easy Calibre conversion back to EPUB)
@@ -25,31 +25,42 @@ A browser-based translation tool for academic texts, designed for researchers an
 
 ## Supported Providers & Models
 
+### Ollama (local, free)
+Run open-source models entirely on your own machine — no API key, no costs, no data leaving your computer.
+
+- Any model installed via `ollama pull`, e.g. **llama3.2**, **mistral**, **gemma3**, **phi4**, **qwen2.5**
+- Quality varies by model; for academic translation, 7B+ parameter models work best
+
+**Requires setup:** see [Ollama Setup](#ollama-setup) below.
+
 ### Google Gemini
-- **Gemini 3 Flash** – Fastest, very cheap (~$0.02 per 100k chars)
-- **Gemini 2.5 Flash** – Fast and affordable (~$0.02 per 100k chars)
-- **Gemini 3 Pro** – Best quality from Google
+- **Gemini 3 Flash** – Fast and cheap, recommended default (~$0.015 per 100k chars)
+- **Gemini 2.5 Flash** – Stable alternative
+- **Gemini 2.5 Pro** – Best quality from Google
 
 **Free tier available:** Gemini offers generous free usage limits, making it ideal for testing and smaller projects.
 **Note:** Gemini's free tier may use your data for model training. For sensitive content, use the paid tier or another provider.
 
 ### OpenAI
-- **GPT-4o Mini** – Fast and cheap (~$0.02 per 100k chars)
-- **GPT-4o** – High quality
-- **GPT-4 Turbo** – Alternative high-quality option
+- **GPT-4o Mini** – Proven workhorse, fast and cheap (~$0.02 per 100k chars)
+- **GPT-5.4 Nano** – New, very cheap option (~$0.01 per 100k chars)
+- **GPT-5.4 Mini** – Balanced new option (~$0.025 per 100k chars)
+- **GPT-5.5** – Current flagship, best quality (~$0.50 per 100k chars)
+
 
 ### Anthropic Claude
-- **Claude 3.5 Haiku** – Fast and affordable (~$0.04 per 100k chars)
-- **Claude Sonnet 4** – Balanced quality and cost (recommended)
-- **Claude Opus 4** – Highest quality
+- **Claude Haiku 4.5** – Fast and affordable (~$0.04 per 100k chars)
+- **Claude Sonnet 4.6** – Balanced quality and cost (recommended)
+- **Claude Opus 4.7** – Highest quality
 
 ## When to Use Which Provider
 
 | Scenario | Recommended Provider |
 |----------|---------------------|
+| Zero cost, full privacy | Ollama (local) |
 | Large documents, cost-sensitive | Gemini 3 Flash |
-| Sensitive topics (gender, sexuality, politics) | Claude Sonnet 4 |
-| Best overall quality | Claude Sonnet 4 or GPT-4o |
+| Sensitive topics (gender, sexuality, politics) | Claude Sonnet |
+| Best overall quality | Claude Sonnet or GPT-4o |
 | Fastest processing | Gemini 3 Flash |
 
 **Note:** Gemini has strict content filters that may block academic texts on sensitive topics. Claude is significantly more tolerant of scholarly content.
@@ -147,18 +158,22 @@ Approximate costs per 100,000 characters (input + output):
 
 | Model | Cost |
 |-------|------|
+| Ollama (local) | **Free** |
+| GPT-5.4 Nano | ~$0.01 |
 | Gemini 3 Flash | ~$0.015 |
-| Gemini 2.5 Flash | ~$0.02 |
 | GPT-4o Mini | ~$0.02 |
-| Claude 3.5 Haiku | ~$0.04 |
-| Claude Sonnet 4 | ~$0.15 |
-| GPT-4o | ~$0.30 |
-| Claude Opus 4 | ~$0.75 |
+| Gemini 2.5 Flash | ~$0.02 |
+| GPT-5.4 Mini | ~$0.025 |
+| Claude Haiku 4.5 | ~$0.04 |
+| Claude Sonnet 4.6 | ~$0.15 |
+| GPT-5.5 | ~$0.50 |
+| Claude Opus 4.7 | ~$0.75 |
 
 A typical 300-page book (~500,000 characters) costs approximately:
+- Free with Ollama (local)
 - $0.08 with Gemini 3 Flash
-- $0.75 with Claude Sonnet 4
-- $3.75 with Claude Opus 4
+- $0.75 with Claude Sonnet 4.6
+- $7.50 with GPT-5
 
 ## API Keys
 
@@ -178,6 +193,70 @@ A typical 300-page book (~500,000 characters) costs approximately:
 3. Requires payment method on file
 
 **Privacy:** API keys are stored only in your browser's localStorage and sent directly to the respective APIs. They never pass through any third-party server.
+
+---
+
+## Ollama Setup
+
+Ollama lets you run large language models locally — no API key, no costs, no data leaving your machine.
+
+### 1. Install Ollama
+
+Download from [ollama.com](https://ollama.com) and install for your OS (macOS, Linux, Windows).
+
+### 2. Choose a model
+
+*Model recommendations last updated: 2 May 2026.*
+
+The right model depends on your GPU memory (VRAM). Ollama uses Q4_K_M quantization by default — a good balance of quality and size.
+
+**Rule of thumb:** A 3–4B model needs ~2.5–3.5 GB VRAM and runs well on consumer GPUs. 7B models need ~4–4.5 GB and may partially spill into CPU RAM (slower, but still usable).
+
+| Model | Size | VRAM | Best for |
+|-------|------|------|----------|
+| `qwen2.5:3b` | 3B | ~2.5 GB | **Recommended.** Best multilingual quality in class — DE/EN/FR/IT very natural |
+| `translategemma:4b` | 4B | ~3 GB | **Translation-optimized** (Gemma 3 base, fine-tuned for translation) |
+| `phi4:mini` | 3.8B | ~3 GB | Strong reasoning → coherent, consistent translations |
+| `gemma3:4b` | 4B | ~3.3 GB | Solid all-rounder from Google |
+| `llama3.2:3b` | 3B | ~2 GB | Reliable fallback, broad community support |
+| `qwen2.5:7b` | 7B | ~4.1 GB | Better quality if your GPU can handle it |
+
+**Start here:** `qwen2.5:3b` or `translategemma:4b` — currently the strongest options for EN/DE/FR/IT translation on modest hardware.
+
+```bash
+ollama pull qwen2.5:3b
+ollama pull translategemma:4b
+```
+
+### 3. Start Ollama with browser access (CORS)
+
+Browsers block requests to `localhost` from web pages by default. You need to tell Ollama to allow this:
+
+**macOS / Linux:**
+```bash
+OLLAMA_ORIGINS=* ollama serve
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:OLLAMA_ORIGINS="*"; ollama serve
+```
+
+**Windows (Command Prompt):**
+```cmd
+set OLLAMA_ORIGINS=* && ollama serve
+```
+
+Keep this terminal window open while using the Archillator.
+
+> **Tip:** If Ollama is already running in the background (e.g. started automatically at login), stop it first (`ollama stop` or quit from the system tray), then start it with the command above.
+
+### 4. Use in Archillator
+
+1. Select **🦙 Ollama** in the provider tabs
+2. Leave the host as `http://localhost:11434` (default) or enter a custom host if running Ollama on another machine
+3. Enter the model name exactly as you pulled it (e.g. `qwen2.5:3b`)
+4. Translate as usual — no API key required
 
 ## Technical Details
 
