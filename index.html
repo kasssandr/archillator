@@ -710,6 +710,9 @@ Works great for:
             } else if (currentProvider === 'ollama') {
                 apiKey = ollamaHostInput.value.trim() || 'http://localhost:11434';
                 providerName = 'Ollama';
+            } else if (currentProvider === 'openrouter') {
+                apiKey = openrouterKeyInput.value.trim();
+                providerName = 'OpenRouter';
             } else {
                 apiKey = anthropicKeyInput.value.trim();
                 providerName = 'Claude';
@@ -845,6 +848,9 @@ ${text}`;
             } else if (currentProvider === 'ollama') {
                 apiKey = ollamaHostInput.value.trim() || 'http://localhost:11434';
                 providerName = 'Ollama';
+            } else if (currentProvider === 'openrouter') {
+                apiKey = openrouterKeyInput.value.trim();
+                providerName = 'OpenRouter';
             } else {
                 apiKey = anthropicKeyInput.value.trim();
                 providerName = 'Claude';
@@ -1164,6 +1170,12 @@ ${text}`;
                 document.getElementById('costText').textContent = 'Free (local model)';
                 return;
             }
+            if (currentProvider === 'openrouter') {
+                const orModel = document.getElementById('openrouterModel').value;
+                document.getElementById('costText').textContent =
+                    orModel.endsWith(':free') ? 'Free (rate-limited model)' : 'Varies by model (see openrouter.ai)';
+                return;
+            }
 
             let model;
             if (currentProvider === 'gemini') {
@@ -1227,6 +1239,9 @@ ${text}`;
             } else if (currentProvider === 'ollama') {
                 apiKey = ollamaHostInput.value.trim() || 'http://localhost:11434';
                 providerName = 'Ollama';
+            } else if (currentProvider === 'openrouter') {
+                apiKey = openrouterKeyInput.value.trim();
+                providerName = 'OpenRouter';
             } else {
                 apiKey = anthropicKeyInput.value.trim();
                 providerName = 'Claude';
