@@ -161,6 +161,10 @@
                         class="provider-tab px-4 py-2 font-medium">
                         🦙 Ollama
                     </button>
+                    <button onclick="selectProvider('openrouter')" id="tab-openrouter"
+                        class="provider-tab px-4 py-2 font-medium">
+                        🔀 OpenRouter
+                    </button>
                 </div>
             </div>
 
@@ -232,6 +236,26 @@
                     <input type="text" id="ollamaModel" placeholder="llama3.2, mistral, gemma3 …"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                     <p class="text-xs text-gray-500 mt-1">Any model installed via <code>ollama pull &lt;model&gt;</code></p>
+                </div>
+            </div>
+
+            <!-- OpenRouter Settings -->
+            <div id="settings-openrouter" class="flex flex-wrap gap-4 items-start hidden">
+                <div class="flex-1 min-w-[250px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">OpenRouter API Key</label>
+                    <input type="password" id="openrouterApiKey" placeholder="sk-or-..."
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <a href="https://openrouter.ai/keys" target="_blank" class="text-xs text-indigo-600 hover:underline">Get API key →</a>
+                    <p class="text-xs text-gray-500 mt-1">Free <code>:free</code> models are rate-limited.</p>
+                </div>
+                <div class="w-64">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                    <select id="openrouterModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="meta-llama/llama-3.3-70b-instruct:free">Llama 3.3 70B (free)</option>
+                        <option value="google/gemma-3-27b-it:free">Gemma 3 27B (free)</option>
+                        <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek V3 (free)</option>
+                        <option value="openai/gpt-4o-mini">GPT-4o Mini (paid)</option>
+                    </select>
                 </div>
             </div>
 
