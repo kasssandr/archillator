@@ -960,6 +960,30 @@ ${text}`;
                 const data = await response.json();
                 return data.choices[0].message.content.trim();
 
+            } else if (currentProvider === 'openrouter') {
+                const model = document.getElementById('openrouterModel').value;
+                const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${apiKey}`,
+                        'HTTP-Referer': 'https://archilles.org/archillator/',
+                        'X-Title': 'Archillator'
+                    },
+                    body: JSON.stringify({
+                        model: model,
+                        messages: [{ role: 'user', content: prompt }],
+                        temperature: 0.1,
+                        max_tokens: 8192
+                    })
+                });
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({}));
+                    throw new Error(error.error?.message || `API Error: ${response.status}`);
+                }
+                const data = await response.json();
+                return data.choices[0].message.content.trim();
+
             } else {
                 const model = document.getElementById('anthropicModel').value;
                 const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1856,6 +1880,8 @@ ${text}`;
                 return await translateWithOpenAI(text, apiKey);
             } else if (currentProvider === 'ollama') {
                 return await translateWithOllama(text, apiKey);
+            } else if (currentProvider === 'openrouter') {
+                return await translateWithOpenRouter(text, apiKey);
             } else {
                 return await translateWithAnthropic(text, apiKey);
             }
@@ -1868,6 +1894,8 @@ ${text}`;
                 return await translateWithOpenAIBatch(text, separator, apiKey);
             } else if (currentProvider === 'ollama') {
                 return await translateWithOllamaBatch(text, separator, apiKey);
+            } else if (currentProvider === 'openrouter') {
+                return await translateWithOpenRouterBatch(text, separator, apiKey);
             } else {
                 return await translateWithAnthropicBatch(text, separator, apiKey);
             }
@@ -2100,6 +2128,91 @@ ${text}`;
 
             if (!response.ok) {
                 const error = await response.json();
+                throw new Error(error.error?.message || `API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            let result = data.choices[0].message.content;
+            const useBlankLines = document.getElementById('blankLines').checked;
+            if (useBlankLines) {
+                result = result.replace(/\n{3,}/g, '\n\n').trim();
+            } else {
+                result = result.replace(/\n{2,}/g, '\n').trim();
+            }
+            return result;
+        }
+
+        // OpenRouter API functions (OpenAI-compatible aggregator)
+        async function translateWithOpenRouter(text, apiKey) {
+            const model = document.getElementById('openrouterModel').value;
+            const prompt = getTranslationPrompt(text);
+
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                    'HTTP-Referer': 'https://archilles.org/archillator/',
+                    'X-Title': 'Archillator'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are a professional translator specializing in academic and historical texts. Translate accurately while maintaining readability.'
+                        },
+                        { role: 'user', content: prompt }
+                    ],
+                    temperature: 0.3,
+                    max_tokens: 8192
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.error?.message || `API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            let result = data.choices[0].message.content;
+            const useBlankLines = document.getElementById('blankLines').checked;
+            if (useBlankLines) {
+                result = result.replace(/\n{3,}/g, '\n\n').trim();
+            } else {
+                result = result.replace(/\n{2,}/g, '\n').trim();
+            }
+            return result;
+        }
+
+        async function translateWithOpenRouterBatch(text, separator, apiKey) {
+            const model = document.getElementById('openrouterModel').value;
+            const prompt = getBatchTranslationPrompt(text, separator);
+
+            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                    'HTTP-Referer': 'https://archilles.org/archillator/',
+                    'X-Title': 'Archillator'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are a professional translator. Translate the paragraphs while preserving the ===PARAGRAPH_BREAK=== markers exactly as they appear.'
+                        },
+                        { role: 'user', content: prompt }
+                    ],
+                    temperature: 0.3,
+                    max_tokens: 16384
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
                 throw new Error(error.error?.message || `API Error: ${response.status}`);
             }
 
