@@ -1,11 +1,15 @@
 name: Sync Archillator to archilles.org
 
+# DISABLED 2026-05-20 — auto-sync neutralisiert.
+# Diese Action kopierte archillator.html (alte Design-Version) per rohem `cp`
+# nach archilles.org/archillator/index.html und ÜBERSCHRIEB damit das kanonische
+# Live-Tool (neues Design + Ollama + MD + lokale Fonts + Site-Navbar), das jetzt
+# direkt im archilles.org-Repo gepflegt wird. Der Push-Trigger ist deshalb
+# entfernt; die Action läuft nur noch manuell. NICHT wieder auf push umstellen,
+# ohne vorher die Source-of-Truth zu klären und einen Fonts/Navbar-Anpassungs-
+# schritt einzubauen.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'archillator.html'
-      - 'favicon.svg'
+  workflow_dispatch:
 
 jobs:
   sync:
