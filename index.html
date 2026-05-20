@@ -588,6 +588,7 @@ Works great for:
         const anthropicKeyInput = document.getElementById('anthropicApiKey');
         const ollamaHostInput = document.getElementById('ollamaHost');
         const ollamaModelInput = document.getElementById('ollamaModel');
+        const openrouterKeyInput = document.getElementById('openrouterApiKey');
 
         // Load saved keys/settings
         const savedGeminiKey = localStorage.getItem('geminiApiKey');
@@ -600,6 +601,8 @@ Works great for:
         if (savedAnthropicKey) anthropicKeyInput.value = savedAnthropicKey;
         if (savedOllamaHost) ollamaHostInput.value = savedOllamaHost;
         if (savedOllamaModel) ollamaModelInput.value = savedOllamaModel;
+        const savedOpenrouterKey = localStorage.getItem('openrouterApiKey');
+        if (savedOpenrouterKey) openrouterKeyInput.value = savedOpenrouterKey;
 
         // Save on change
         geminiKeyInput.addEventListener('change', () => localStorage.setItem('geminiApiKey', geminiKeyInput.value));
@@ -607,6 +610,7 @@ Works great for:
         anthropicKeyInput.addEventListener('change', () => localStorage.setItem('anthropicApiKey', anthropicKeyInput.value));
         ollamaHostInput.addEventListener('change', () => localStorage.setItem('ollamaHost', ollamaHostInput.value));
         ollamaModelInput.addEventListener('change', () => localStorage.setItem('ollamaModel', ollamaModelInput.value));
+        openrouterKeyInput.addEventListener('change', () => localStorage.setItem('openrouterApiKey', openrouterKeyInput.value));
 
         // Drag and drop
         const dropZone = document.getElementById('dropZone');
@@ -641,10 +645,12 @@ Works great for:
             document.getElementById('tab-openai').classList.toggle('active', provider === 'openai');
             document.getElementById('tab-anthropic').classList.toggle('active', provider === 'anthropic');
             document.getElementById('tab-ollama').classList.toggle('active', provider === 'ollama');
+            document.getElementById('tab-openrouter').classList.toggle('active', provider === 'openrouter');
             document.getElementById('settings-gemini').classList.toggle('hidden', provider !== 'gemini');
             document.getElementById('settings-openai').classList.toggle('hidden', provider !== 'openai');
             document.getElementById('settings-anthropic').classList.toggle('hidden', provider !== 'anthropic');
             document.getElementById('settings-ollama').classList.toggle('hidden', provider !== 'ollama');
+            document.getElementById('settings-openrouter').classList.toggle('hidden', provider !== 'openrouter');
         }
 
         // ==================== PASSAGE MODE ====================
