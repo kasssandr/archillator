@@ -154,21 +154,21 @@
                         class="provider-tab active px-4 py-2 font-medium">
                         🔷 Gemini
                     </button>
-                    <button onclick="selectProvider('openai')" id="tab-openai"
-                        class="provider-tab px-4 py-2 font-medium">
-                        🟢 OpenAI
-                    </button>
                     <button onclick="selectProvider('anthropic')" id="tab-anthropic"
                         class="provider-tab px-4 py-2 font-medium">
                         🟠 Claude
                     </button>
-                    <button onclick="selectProvider('ollama')" id="tab-ollama"
+                    <button onclick="selectProvider('openai')" id="tab-openai"
                         class="provider-tab px-4 py-2 font-medium">
-                        🦙 Ollama
+                        🟢 OpenAI
                     </button>
                     <button onclick="selectProvider('openrouter')" id="tab-openrouter"
                         class="provider-tab px-4 py-2 font-medium">
                         🔀 OpenRouter
+                    </button>
+                    <button onclick="selectProvider('ollama')" id="tab-ollama"
+                        class="provider-tab px-4 py-2 font-medium">
+                        🦙 Ollama
                     </button>
                 </div>
             </div>
@@ -177,7 +177,7 @@
             <div id="settings-gemini" class="flex flex-wrap gap-4 items-start">
                 <div class="flex-1 min-w-[250px]">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Gemini API Key</label>
-                    <input type="password" id="geminiApiKey" placeholder="AIza..." 
+                    <input type="password" id="geminiApiKey" placeholder="AIza..." autocomplete="off" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-600 hover:underline">Get API key →</a>
                 </div>
@@ -191,11 +191,29 @@
                 </div>
             </div>
 
+            <!-- Anthropic/Claude Settings -->
+            <div id="settings-anthropic" class="flex flex-wrap gap-4 items-start hidden">
+                <div class="flex-1 min-w-[250px]">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Anthropic API Key</label>
+                    <input type="password" id="anthropicApiKey" placeholder="sk-ant-..." autocomplete="off" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <a href="https://console.anthropic.com/settings/keys" target="_blank" class="text-xs text-orange-600 hover:underline">Get API key →</a>
+                </div>
+                <div class="w-64">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
+                    <select id="anthropicModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
+                        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (fast, cheap)</option>
+                        <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (balanced)</option>
+                        <option value="claude-opus-4-7">Claude Opus 4.7 (best quality)</option>
+                    </select>
+                </div>
+            </div>
+
             <!-- OpenAI Settings -->
             <div id="settings-openai" class="flex flex-wrap gap-4 items-start hidden">
                 <div class="flex-1 min-w-[250px]">
                     <label class="block text-sm font-medium text-gray-700 mb-1">OpenAI API Key</label>
-                    <input type="password" id="openaiApiKey" placeholder="sk-..." 
+                    <input type="password" id="openaiApiKey" placeholder="sk-..." autocomplete="off" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" 
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
                     <a href="https://platform.openai.com/api-keys" target="_blank" class="text-xs text-green-600 hover:underline">Get API key →</a>
                 </div>
@@ -210,20 +228,22 @@
                 </div>
             </div>
 
-            <!-- Anthropic/Claude Settings -->
-            <div id="settings-anthropic" class="flex flex-wrap gap-4 items-start hidden">
+            <!-- OpenRouter Settings -->
+            <div id="settings-openrouter" class="flex flex-wrap gap-4 items-start hidden">
                 <div class="flex-1 min-w-[250px]">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Anthropic API Key</label>
-                    <input type="password" id="anthropicApiKey" placeholder="sk-ant-..." 
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                    <a href="https://console.anthropic.com/settings/keys" target="_blank" class="text-xs text-orange-600 hover:underline">Get API key →</a>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">OpenRouter API Key</label>
+                    <input type="password" id="openrouterApiKey" placeholder="sk-or-..." autocomplete="off" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <a href="https://openrouter.ai/keys" target="_blank" class="text-xs text-indigo-600 hover:underline">Get API key →</a>
+                    <p class="text-xs text-gray-500 mt-1">Free <code>:free</code> models are rate-limited.</p>
                 </div>
                 <div class="w-64">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                    <select id="anthropicModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-                        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (fast, cheap)</option>
-                        <option value="claude-sonnet-4-6">Claude Sonnet 4.6 (balanced)</option>
-                        <option value="claude-opus-4-7">Claude Opus 4.7 (best quality)</option>
+                    <select id="openrouterModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="nvidia/nemotron-3-super-120b-a12b:free">Nemotron 120B (free)</option>
+                        <option value="google/gemma-4-31b-it:free">Gemma 4 31B (free)</option>
+                        <option value="deepseek/deepseek-v4-flash:free">DeepSeek V4 Flash (free)</option>
+                        <option value="google/gemini-3.5-flash">Gemini 3.5 Flash (paid)</option>
                     </select>
                 </div>
             </div>
@@ -241,26 +261,6 @@
                     <input type="text" id="ollamaModel" placeholder="llama3.2, mistral, gemma3 …"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                     <p class="text-xs text-gray-500 mt-1">Any model installed via <code>ollama pull &lt;model&gt;</code></p>
-                </div>
-            </div>
-
-            <!-- OpenRouter Settings -->
-            <div id="settings-openrouter" class="flex flex-wrap gap-4 items-start hidden">
-                <div class="flex-1 min-w-[250px]">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">OpenRouter API Key</label>
-                    <input type="password" id="openrouterApiKey" placeholder="sk-or-..."
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <a href="https://openrouter.ai/keys" target="_blank" class="text-xs text-indigo-600 hover:underline">Get API key →</a>
-                    <p class="text-xs text-gray-500 mt-1">Free <code>:free</code> models are rate-limited.</p>
-                </div>
-                <div class="w-64">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                    <select id="openrouterModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                        <option value="nvidia/nemotron-3-super-120b-a12b:free">Nemotron 120B (free)</option>
-                        <option value="google/gemma-4-31b-it:free">Gemma 4 31B (free)</option>
-                        <option value="deepseek/deepseek-v4-flash:free">DeepSeek V4 Flash (free)</option>
-                        <option value="google/gemini-3.5-flash">Gemini 3.5 Flash (paid)</option>
-                    </select>
                 </div>
             </div>
 
