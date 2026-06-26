@@ -286,6 +286,7 @@
                         <option value="neutral">Neutral / general</option>
                         <option value="simple">Simplified / readable</option>
                         <option value="literal">As literal as possible</option>
+                        <option value="archilles-scholarly">Archilles (scholarly, marker-preserving)</option>
                     </select>
                 </div>
                 <div class="flex items-center gap-2 pb-2">
@@ -1906,6 +1907,16 @@ ${text}`;
             }
         }
 
+        const ARCHILLES_BRIEFING = `Preserve the following markers EXACTLY, character for character, keeping them in place. Never translate, reorder, normalize, add, or remove them:
+- ^n^   footnote reference (e.g. ^12^): keep the carets and the digits.
+- ¶n¶   page marker: keep exactly.
+- <dnt>…</dnt>   do-not-translate: titles, sigla, foreign terms. Keep the <dnt> and </dnt> tags AND reproduce the text between them EXACTLY as in the source — same language, same spelling. Never translate, Germanize, or normalize it (e.g. leave "Chronicle of Uzès" as is; do NOT render it "Chronik von Uzès").
+- ‹…›   foreign-language quotation: keep the guillemets AND leave the enclosed text verbatim.
+- ⟦…⟧   editorial gloss (already in the target language): keep the brackets AND leave the enclosed text unchanged.
+- _…_   emphasis: keep the underscores, but DO translate the enclosed text.
+- ⏎     hard line break: keep exactly.
+Also leave referenced work titles, proper names, and bibliographic references verbatim even when untagged — especially inside footnotes. When in doubt, do not translate: bibliographic precision outranks completeness.`;
+
         function getTranslationPrompt(text) {
             const targetLang = document.getElementById('targetLang').value;
             const style = document.getElementById('styleHint').value;
@@ -1919,10 +1930,11 @@ ${text}`;
                 'academic': 'Maintain an academic, scholarly tone. Preserve technical terminology.',
                 'neutral': 'Use a neutral, clear tone suitable for general readers.',
                 'simple': 'Use simple, accessible language. Avoid jargon.',
-                'literal': 'Translate as literally as possible while remaining grammatically correct.'
+                'literal': 'Translate as literally as possible while remaining grammatically correct.',
+                'archilles-scholarly': `Maintain an academic, scholarly register. ${ARCHILLES_BRIEFING}`,
             };
 
-            return `Translate the following text to ${langNames[targetLang]}. 
+            return `Translate the following text to ${langNames[targetLang]}.
 ${styleInstructions[style]}
 Preserve paragraph breaks.
 Output only the translation, no explanations or preamble.
@@ -2042,7 +2054,8 @@ ${text}`;
                 'academic': 'Maintain an academic, scholarly tone. Preserve technical terminology.',
                 'neutral': 'Use a neutral, clear tone suitable for general readers.',
                 'simple': 'Use simple, accessible language. Avoid jargon.',
-                'literal': 'Translate as literally as possible while remaining grammatically correct.'
+                'literal': 'Translate as literally as possible while remaining grammatically correct.',
+                'archilles-scholarly': `Maintain an academic, scholarly register. ${ARCHILLES_BRIEFING}`,
             };
 
             return `Translate the following paragraphs to ${langNames[targetLang]}. 
