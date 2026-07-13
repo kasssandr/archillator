@@ -182,8 +182,116 @@
     return { zip: out, report: report };
   }
 
+  // "Text _kursiv_ mehr[^3]" -> Segmente
+  function parseMarkedText(text) {
+    var segments = [];
+    var re = /_([^_]+)_|\[\^(\d+)\]/g;
+    var last = 0;
+    var m;
+    while ((m = re.exec(text)) !== null) {
+      if (m.index > last) {
+        segments.push({ kind: "normal", text: text.slice(last, m.index) });
+      }
+      if (m[1] !== undefined) segments.push({ kind: "italic", text: m[1] });
+      else segments.push({ kind: "footnoteRef", id: parseInt(m[2], 10) });
+      last = re.lastIndex;
+    }
+    if (last < text.length) segments.push({ kind: "normal", text: text.slice(last) });
+    return segments;
+  }
+
+  // Schema-Reihenfolge in w:rPr. Bei falscher Reihenfolge verweigert Word die Datei.
+  var RPR_ORDER = ["rStyle", "rFonts", "b", "bCs", "i", "iCs", "caps", "smallCaps",
+    "strike", "dstrike", "outline", "shadow", "emboss", "imprint", "noProof",
+    "snapToGrid", "vanish", "webHidden", "color", "spacing", "w", "kern", "position",
+    "sz", "szCs", "highlight", "u", "effect", "bdr", "shd", "fitText", "vertAlign",
+    "rtl", "cs", "em", "lang", "eastAsianLayout", "specVanish", "oMath"];
+
+  function insertOrdered(rPr, child) {
+    var idx = RPR_ORDER.indexOf(tag(child));
+    var kids = childElements(rPr);
+    for (var i = 0; i < kids.length; i++) {
+      var pos = RPR_ORDER.indexOf(tag(kids[i]));
+      if (pos > idx) {
+        rPr.insertBefore(child, kids[i]);
+        return;
+      }
+    }
+    rPr.appendChild(child);
+  }
+
+  // Ist das der Run mit der automatischen Fussnotennummer (<w:footnoteRef/>)?
+  function isFootnoteRefRun(runEl) {
+    return runEl.getElementsByTagNameNS(W, "footnoteRef").length > 0;
+  }
+
+  // Vorlage-rPr: erster Run mit w:t-Text. Bei Fussnoten ausdruecklich NICHT der
+  // Nummern-Run - dessen Stil ist hochgestellt und wuerde den ganzen Text hochstellen.
+  function templateRPr(pEl) {
+    var runs = childElements(pEl).filter(function (c) {
+      return tag(c) === "r";
+    });
+    for (var i = 0; i < runs.length; i++) {
+      if (isFootnoteRefRun(runs[i])) continue;
+      if (runs[i].getElementsByTagNameNS(W, "t").length === 0) continue;
+      var rPr = childElements(runs[i]).filter(function (c) {
+        return tag(c) === "rPr";
+      })[0];
+      return rPr ? rPr.cloneNode(true) : null;
+    }
+    return null;
+  }
+
+  function makeRun(doc, rPrTemplate, segment) {
+    var run = doc.createElementNS(W, "w:r");
+
+    if (segment.kind === "footnoteRef") {
+      // Referenz-Run: eigener Stil, keine geerbte Textformatierung.
+      var refPr = doc.createElementNS(W, "w:rPr");
+      var style = doc.createElementNS(W, "w:rStyle");
+      style.setAttribute("w:val", "FootnoteReference");
+      refPr.appendChild(style);
+      run.appendChild(refPr);
+      var ref = doc.createElementNS(W, "w:footnoteReference");
+      ref.setAttribute("w:id", String(segment.id));
+      run.appendChild(ref);
+      return run;
+    }
+
+    var rPr = rPrTemplate ? rPrTemplate.cloneNode(true) : doc.createElementNS(W, "w:rPr");
+    if (segment.kind === "italic") {
+      var hasItalic = childElements(rPr).some(function (c) {
+        return tag(c) === "i";
+      });
+      if (!hasItalic) insertOrdered(rPr, doc.createElementNS(W, "w:i"));
+    }
+    if (childElements(rPr).length) run.appendChild(rPr);
+
+    var t = doc.createElementNS(W, "w:t");
+    t.setAttribute("xml:space", "preserve");
+    t.appendChild(doc.createTextNode(segment.text));
+    run.appendChild(t);
+    return run;
+  }
+
   function rebuildParagraph(pEl, text, isFootnote) {
-    throw new Error("rebuildParagraph: implementiert in Task 5");
+    var doc = pEl.ownerDocument;
+    var rPrTemplate = templateRPr(pEl);
+
+    // Alte Runs entfernen. Bei Fussnoten bleibt der Nummern-Run stehen, sonst
+    // verschwindet die Fussnotennummer. w:pPr wird nie angefasst - damit ueberleben
+    // Style (Heading1), Ausrichtung, Abstaende, Einzuege.
+    childElements(pEl).forEach(function (child) {
+      if (tag(child) !== "r") return;
+      if (isFootnote && isFootnoteRefRun(child)) return;
+      pEl.removeChild(child);
+    });
+
+    // Fussnotentext beginnt konventionell mit einem Leerzeichen nach der Nummer.
+    var body = isFootnote ? " " + text : text;
+    parseMarkedText(body).forEach(function (segment) {
+      pEl.appendChild(makeRun(doc, rPrTemplate, segment));
+    });
   }
 
   root.docxToItems = docxToItems;

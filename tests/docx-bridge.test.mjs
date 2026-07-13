@@ -64,3 +64,42 @@ test("Identitaets-Roundtrip: ohne Uebersetzung bleibt alles gleich", async () =>
   assert.ok(zip.file("word/styles.xml"), "styles.xml uebernommen");
   assert.ok(zip.file("[Content_Types].xml"), "Content_Types uebernommen");
 });
+
+test("Rueckbau: Kursiv und Fussnotenreferenzen ueberleben die Uebersetzung", async () => {
+  const original = await buildMiniDocx();
+  const items = await docxToItems(original);
+  const translations = items.map((i) =>
+    i.source === "body" && i.text.startsWith("Josephus")
+      ? "Josephus in _Der Juedische Krieg_ sagt es.[^1] Und nochmals.[^2]"
+      : null,
+  );
+
+  const { zip } = await itemsToDocx(original, items, translations);
+  const after = await zip.file("word/document.xml").async("string");
+
+  assert.match(after, /Der Juedische Krieg/);
+  assert.doesNotMatch(after, /The Jewish War/, "Original ersetzt");
+  assert.doesNotMatch(after, /\[\^1\]/, "Marker nicht als Literal im XML");
+  assert.equal((after.match(/<w:footnoteReference /g) || []).length, 2, "beide Refs zurueck");
+  assert.match(after, /<w:i\/>/, "Kursiv-Run rekonstruiert");
+  assert.match(after, /w:val="Heading1"/, "pPr des anderen Absatzes unangetastet");
+});
+
+test("Rueckbau einer Fussnote: Nummer bleibt, Text ist nicht hochgestellt", async () => {
+  const original = await buildMiniDocx();
+  const items = await docxToItems(original);
+  const translations = items.map((i) =>
+    i.fnId === 1 ? "Hadas-Lebel, 1993:51 (uebersetzt)." : null,
+  );
+
+  const { zip } = await itemsToDocx(original, items, translations);
+  const fn = await zip.file("word/footnotes.xml").async("string");
+
+  assert.match(fn, /uebersetzt/);
+  // Die automatische Nummer muss erhalten bleiben ...
+  assert.equal((fn.match(/<w:footnoteRef\/>/g) || []).length, 2);
+  // ... und der Textrun darf NICHT den FootnoteReference-Stil erben (sonst hochgestellt).
+  const note1 = fn.split('w:id="1"')[1].split("</w:footnote>")[0];
+  const styleCount = (note1.match(/w:val="FootnoteReference"/g) || []).length;
+  assert.equal(styleCount, 1, "nur die Nummer traegt den hochgestellten Stil");
+});
