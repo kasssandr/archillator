@@ -103,3 +103,33 @@ test("Rueckbau einer Fussnote: Nummer bleibt, Text ist nicht hochgestellt", asyn
   const styleCount = (note1.match(/w:val="FootnoteReference"/g) || []).length;
   assert.equal(styleCount, 1, "nur die Nummer traegt den hochgestellten Stil");
 });
+
+test("Report: fehlende, fehlerhafte und markerkaputte Uebersetzungen", async () => {
+  const original = await buildMiniDocx();
+  const items = await docxToItems(original);
+
+  const translations = items.map((i, n) => {
+    if (n === 0) return null; // nicht uebersetzt
+    if (n === 1) return "Josephus sagt es. Und nochmals.[^2]"; // [^1] fehlt
+    if (n === 2) return "[ERROR: high demand] Hadas-Lebel"; // API-Fehler
+    return "Ebd.";
+  });
+
+  const { zip, report } = await itemsToDocx(original, items, translations);
+
+  assert.equal(report.length, 3);
+  assert.match(report[0].reason, /nicht uebersetzt/i);
+  assert.match(report[1].reason, /Marker/i);
+  assert.match(report[2].reason, /ERROR/i);
+  assert.ok(report[1].sample.length > 0, "Textbeispiel vorhanden");
+  assert.deepEqual(report.map((r) => r.index), [0, 1, 2], "nach Position sortiert");
+
+  // Die drei Faelle behalten ihr Original; NIE eine Fehlermeldung im Dokument.
+  const doc = await zip.file("word/document.xml").async("string");
+  assert.match(doc, /INTRODUCTION/);
+  assert.match(doc, /The Jewish War/, "markerkaputter Absatz bleibt im Original");
+  assert.doesNotMatch(doc, /ERROR/, "keine Fehlermeldung im Dokument");
+  const fn = await zip.file("word/footnotes.xml").async("string");
+  assert.doesNotMatch(fn, /ERROR/);
+  assert.match(fn, /Ebd\./, "die intakte Uebersetzung wird eingesetzt");
+});

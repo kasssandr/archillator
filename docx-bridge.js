@@ -169,12 +169,21 @@
 
     for (var i = 0; i < items.length; i++) {
       var item = items[i];
-      var translated = translations[i];
-      if (!translated) continue; // ohne Uebersetzung bleibt das Original stehen
+      var problem = checkTranslation(item, translations[i]);
+      if (problem) {
+        // Original stehen lassen. Niemals eine Fehlermeldung ins Dokument schreiben -
+        // im fertigen DOCX faellt sie niemandem auf.
+        report.push({
+          index: i,
+          reason: problem,
+          sample: item.text.slice(0, 70), // suchbares Textbeispiel
+        });
+        continue;
+      }
       var target =
         item.source === "body" ? bodyParas[item.paraIndex] : fnParas[item.paraIndex];
       if (!target) continue;
-      rebuildParagraph(target, translated, item.source === "footnotes");
+      rebuildParagraph(target, translations[i], item.source === "footnotes");
     }
 
     out.file("word/document.xml", serializeXml(docXml));
@@ -294,7 +303,43 @@
     });
   }
 
+  function markersOf(text) {
+    return (text.match(/\[\^\d+\]/g) || []).sort().join(",");
+  }
+
+  // Grund, warum die Uebersetzung nicht eingesetzt werden darf - oder null.
+  function checkTranslation(item, translated) {
+    if (!translated || !String(translated).trim()) return "nicht uebersetzt";
+    // Der Archillator schreibt bei API-Fehlern "[ERROR: ...]" + den Originaltext in den
+    // Absatz. Das darf nie ins Dokument geraten.
+    if (translated.indexOf("[ERROR:") !== -1) return "ERROR-Block der Uebersetzung";
+    if (translated.indexOf("[CONTENT FILTER") !== -1) return "ERROR: Content-Filter";
+    if (markersOf(translated) !== markersOf(item.text)) {
+      return (
+        "Fussnoten-Marker weichen ab (erwartet: " + (markersOf(item.text) || "keine") + ")"
+      );
+    }
+    if ((translated.match(/_/g) || []).length % 2 !== 0) {
+      return "unbalancierte _-Auszeichnung";
+    }
+    return null;
+  }
+
+  // Nach Dokumentposition sortiert, je Eintrag ein suchbares Textbeispiel -
+  // interne Indizes sind im Textverarbeiter unsichtbar.
+  function formatReport(report) {
+    if (!report.length) return "Keine Beanstandungen. Alle Absaetze uebersetzt.\n";
+    var lines = ["Pruefbericht - " + report.length + " Stelle(n), Original eingesetzt:", ""];
+    report.forEach(function (entry) {
+      lines.push("Abs. " + entry.index + "  " + entry.reason);
+      lines.push('   "' + entry.sample + '"');
+    });
+    return lines.join("\n") + "\n";
+  }
+
   root.docxToItems = docxToItems;
   root.itemsToDocx = itemsToDocx;
   root.serializeParagraph = serializeParagraph;
+  root.checkTranslation = checkTranslation;
+  root.formatReport = formatReport;
 })(typeof globalThis !== "undefined" ? globalThis : window);
