@@ -138,6 +138,55 @@
     return items;
   }
 
+  // ---------------------------------------------------------------- Export
+
+  // Klont das Original-ZIP vollstaendig. Alles, was wir nicht anfassen, ueberlebt:
+  // Styles, Kopfzeilen, Deckblatt, Bilder, sectPr - nichts davon muss verstanden werden.
+  async function cloneZip(zip) {
+    var out = new root.JSZip();
+    var names = Object.keys(zip.files);
+    for (var i = 0; i < names.length; i++) {
+      var entry = zip.files[names[i]];
+      if (entry.dir) {
+        out.folder(names[i]);
+      } else {
+        out.file(names[i], await entry.async("arraybuffer"));
+      }
+    }
+    return out;
+  }
+
+  async function itemsToDocx(zip, items, translations) {
+    var out = await cloneZip(zip);
+    var report = [];
+
+    var docXml = parseXml(await zip.file("word/document.xml").async("string"));
+    var bodyParas = docXml.getElementsByTagNameNS(W, "p");
+
+    var fnFile = zip.file("word/footnotes.xml");
+    var fnXml = fnFile ? parseXml(await fnFile.async("string")) : null;
+    var fnParas = fnXml ? fnXml.getElementsByTagNameNS(W, "p") : [];
+
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      var translated = translations[i];
+      if (!translated) continue; // ohne Uebersetzung bleibt das Original stehen
+      var target =
+        item.source === "body" ? bodyParas[item.paraIndex] : fnParas[item.paraIndex];
+      if (!target) continue;
+      rebuildParagraph(target, translated, item.source === "footnotes");
+    }
+
+    out.file("word/document.xml", serializeXml(docXml));
+    if (fnXml) out.file("word/footnotes.xml", serializeXml(fnXml));
+    return { zip: out, report: report };
+  }
+
+  function rebuildParagraph(pEl, text, isFootnote) {
+    throw new Error("rebuildParagraph: implementiert in Task 5");
+  }
+
   root.docxToItems = docxToItems;
+  root.itemsToDocx = itemsToDocx;
   root.serializeParagraph = serializeParagraph;
 })(typeof globalThis !== "undefined" ? globalThis : window);
