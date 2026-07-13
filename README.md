@@ -5,7 +5,7 @@ A browser-based translation tool for academic texts, designed for researchers an
 
 ## Features
 
-- **Four Translation Providers:** Google Gemini, OpenAI GPT, Anthropic Claude, and Ollama (local, free)
+- **Five Translation Providers:** Google Gemini, OpenAI GPT, Anthropic Claude, OpenRouter (free models), and Ollama (local, free)
 - **Three Modes:** Passage mode for quick translations, Document mode for entire files, Proofread mode for spelling correction
 - **Multiple Input Formats:** DOCX, EPUB, TXT, Markdown (.md)
 - **Smart Output:** DOCX/EPUB inputs produce DOCX output (easy Calibre conversion back to EPUB)
@@ -17,8 +17,8 @@ A browser-based translation tool for academic texts, designed for researchers an
 
 ## Quick Start
 
-1. Open `archillator.html` in any modern browser
-2. Enter your API key (Gemini, OpenAI, and/or Anthropic)
+1. Open `index.html` in any modern browser — the tool is a single self-contained file, so you can copy it anywhere and run it locally
+2. Enter your API key (Gemini, OpenAI, Anthropic, or OpenRouter) — or pick Ollama and use no key at all
 3. Choose your target language and style
 4. Either paste text (Passage mode, Proofread mode) or upload a file (Document mode)
 5. Click translate and download the result
@@ -33,35 +33,45 @@ Run open-source models entirely on your own machine — no API key, no costs, no
 
 **Requires setup:** see [Ollama Setup](#ollama-setup) below.
 
-### Google Gemini
-- **Gemini 3 Flash** – Fast and cheap, recommended default (~$0.015 per 100k chars)
-- **Gemini 2.5 Flash** – Stable alternative
-- **Gemini 2.5 Pro** – Best quality from Google
+### OpenRouter (free models)
+One key, many models — including a rotating selection of free ones.
 
-**Free tier available:** Gemini offers generous free usage limits, making it ideal for testing and smaller projects.
+- **Auto — best available free model** (`openrouter/free`) – Lets OpenRouter pick from whatever is currently free. Survives the constant churn in the free line-up.
+- **Nemotron 3 Super 120B** (free) and **Gemma 4 31B** (free)
+- **Gemini 3.5 Flash** (paid) – if you want quality through the same key
+
+**Caveat worth knowing:** free models are rate-limited (roughly 20 requests per minute) and many of them are *reasoning* models. On a long passage such a model can spend its entire output budget on internal thinking and return nothing at all. Archillator reports this clearly instead of crashing — the fix is to translate a shorter passage or switch models.
+
+### Google Gemini
+- **Gemini 3.1 Flash-Lite** – Fast and cheap, recommended default (~$0.04 per 100k chars)
+- **Gemini 3.5 Flash** – Stronger, built for agentic and coding work (~$0.26 per 100k chars)
+- **Gemini 3.1 Pro** – Best quality from Google (~$0.35 per 100k chars)
+
+**Free tier:** since April 2026, only Flash and Flash-Lite still have a free tier — **Pro models are paid-only.**
 **Note:** Gemini's free tier may use your data for model training. For sensitive content, use the paid tier or another provider.
 
 ### OpenAI
-- **GPT-4o Mini** – Proven workhorse, fast and cheap (~$0.02 per 100k chars)
-- **GPT-5.4 Nano** – New, very cheap option (~$0.01 per 100k chars)
-- **GPT-5.4 Mini** – Balanced new option (~$0.025 per 100k chars)
-- **GPT-5.5** – Current flagship, best quality (~$0.50 per 100k chars)
+- **GPT-5.6 Luna** – Fast and cheap (~$0.18 per 100k chars)
+- **GPT-5.6 Terra** – Balanced (~$0.44 per 100k chars)
+- **GPT-5.6 Sol** – Current flagship, best quality (~$0.88 per 100k chars)
 
+**Note:** OpenAI has no free tier — an OpenAI key without credit on the account returns "You exceeded your current quota" on every request.
 
 ### Anthropic Claude
-- **Claude Haiku 4.5** – Fast and affordable (~$0.04 per 100k chars)
-- **Claude Sonnet 4.6** – Balanced quality and cost (recommended)
-- **Claude Opus 4.7** – Highest quality
+- **Claude Haiku 4.5** – Fast and affordable (~$0.15 per 100k chars)
+- **Claude Sonnet 5** – Balanced quality and cost (recommended)
+- **Claude Opus 4.8** – Highest quality (~$0.75 per 100k chars)
 
 ## When to Use Which Provider
 
 | Scenario | Recommended Provider |
 |----------|---------------------|
 | Zero cost, full privacy | Ollama (local) |
-| Large documents, cost-sensitive | Gemini 3 Flash |
-| Sensitive topics (gender, sexuality, politics) | Claude Sonnet |
-| Best overall quality | Claude Sonnet or GPT-4o |
-| Fastest processing | Gemini 3 Flash |
+| Zero cost, no local GPU | OpenRouter (free models) |
+| Large documents, cost-sensitive | Gemini 3.1 Flash-Lite |
+| Sensitive topics (gender, sexuality, politics) | Claude Sonnet 5 |
+| Best overall quality | Claude Opus 4.8 or GPT-5.6 Sol |
+| Fastest processing | Gemini 3.1 Flash-Lite |
 
 **Note:** Gemini has strict content filters that may block academic texts on sensitive topics. Claude is significantly more tolerant of scholarly content.
 
@@ -100,7 +110,7 @@ The tool automatically saves progress during long translations:
 - Checkpoints expire after 24 hours
 - For very large documents (>500 paragraphs), only translated text is saved (re-upload original file to resume)
 
-## Two Modes
+## Three Modes
 
 ### Passage Mode
 For quick translations of text copied from PDFs or other sources.
@@ -117,6 +127,13 @@ For quick translations of text copied from PDFs or other sources.
 - **Clean only** – Just fix formatting, no translation
 - **Translate only** – Translate without cleaning (for already clean text)
 - **Clean & Translate** – Both operations
+
+**Paragraph handling.** There is no automatic paragraph detection, and that is deliberate — guessing where a paragraph ends is exactly what other tools get wrong. *You* mark the paragraphs by inserting a double line break (an empty line); everything else is treated as one flowing paragraph and joined. How those paragraphs then appear in the output is controlled by the **"Blank lines between paragraphs"** checkbox:
+
+- **Checked** – paragraphs are separated by a blank line (double line break)
+- **Unchecked** – paragraphs are separated by a single line break
+
+This applies to every output — cleaning, translation, and document mode alike. Internally the tool always keeps the double break, so the model sees an unambiguous paragraph boundary; your setting is applied on the way out, never on the way to the model.
 
 **Best for:** PDF content, short passages, quick lookups
 
@@ -154,26 +171,27 @@ For spelling and grammar correction without style changes – a DeepL Write alte
 
 ## Cost Estimates
 
-Approximate costs per 100,000 characters (input + output):
+Approximate costs per 100,000 characters (input + output). Derived from the providers' token prices as of July 2026 — treat them as a rough order of magnitude, not a quote.
 
 | Model | Cost |
 |-------|------|
 | Ollama (local) | **Free** |
-| GPT-5.4 Nano | ~$0.01 |
-| Gemini 3 Flash | ~$0.015 |
-| GPT-4o Mini | ~$0.02 |
-| Gemini 2.5 Flash | ~$0.02 |
-| GPT-5.4 Mini | ~$0.025 |
-| Claude Haiku 4.5 | ~$0.04 |
-| Claude Sonnet 4.6 | ~$0.15 |
-| GPT-5.5 | ~$0.50 |
-| Claude Opus 4.7 | ~$0.75 |
+| OpenRouter free models | **Free** (rate-limited) |
+| Gemini 3.1 Flash-Lite | ~$0.04 |
+| Claude Haiku 4.5 | ~$0.15 |
+| GPT-5.6 Luna | ~$0.18 |
+| Gemini 3.5 Flash | ~$0.26 |
+| Gemini 3.1 Pro | ~$0.35 |
+| GPT-5.6 Terra | ~$0.44 |
+| Claude Sonnet 5 | ~$0.45 |
+| Claude Opus 4.8 | ~$0.75 |
+| GPT-5.6 Sol | ~$0.88 |
 
 A typical 300-page book (~500,000 characters) costs approximately:
-- Free with Ollama (local)
-- $0.08 with Gemini 3 Flash
-- $0.75 with Claude Sonnet 4.6
-- $7.50 with GPT-5
+- Free with Ollama (local) or OpenRouter's free models
+- $0.20 with Gemini 3.1 Flash-Lite
+- $2.25 with Claude Sonnet 5
+- $4.40 with GPT-5.6 Sol
 
 ## API Keys
 
@@ -191,6 +209,11 @@ A typical 300-page book (~500,000 characters) costs approximately:
 1. Go to [Anthropic Console](https://console.anthropic.com/settings/keys)
 2. Create a new API key
 3. Requires payment method on file
+
+### OpenRouter
+1. Go to [OpenRouter Keys](https://openrouter.ai/keys)
+2. Create a new API key
+3. No payment method needed for the `:free` models — but they are rate-limited
 
 **Privacy:** API keys are stored only in your browser's localStorage and sent directly to the respective APIs. They never pass through any third-party server.
 
@@ -228,28 +251,44 @@ ollama pull qwen2.5:3b
 ollama pull translategemma:4b
 ```
 
-### 3. Start Ollama with browser access (CORS)
+### 3. Allow browser access (CORS) — one-time setup
 
-Browsers block requests to `localhost` from web pages by default. You need to tell Ollama to allow this:
+Browsers block requests to `localhost` from web pages by default. The solution is to set an environment variable that tells Ollama to allow this. **Do this once and you never have to think about it again.**
 
-**macOS / Linux:**
+#### Windows (recommended: permanent setting)
+
+1. Press the Windows key → search for **"Umgebungsvariablen"** → click "Umgebungsvariablen für dieses Konto bearbeiten"
+2. In the upper section (user variables) → click **New**
+3. Variable name: `OLLAMA_ORIGINS`  
+   Variable value: `*`
+4. Click OK → OK
+5. Restart Ollama once (right-click the tray icon → Quit, then reopen)
+
+From now on Ollama always starts with browser access enabled — nothing more to do.
+
+#### macOS / Linux (permanent setting)
+
+Add this line to your shell profile (`~/.zshrc`, `~/.bashrc`, or `~/.profile`):
+
 ```bash
-OLLAMA_ORIGINS=* ollama serve
+export OLLAMA_ORIGINS="*"
 ```
 
-**Windows (PowerShell):**
-```powershell
+Then run `source ~/.zshrc` (or restart the terminal) and restart Ollama.
+
+#### Temporary alternative (any OS)
+
+If you only want to enable it for one session, start Ollama manually from a terminal — but this window must stay open while translating:
+
+```bash
+# macOS / Linux
+OLLAMA_ORIGINS=* ollama serve
+
+# Windows PowerShell
 $env:OLLAMA_ORIGINS="*"; ollama serve
 ```
 
-**Windows (Command Prompt):**
-```cmd
-set OLLAMA_ORIGINS=* && ollama serve
-```
-
-Keep this terminal window open while using the Archillator.
-
-> **Tip:** If Ollama is already running in the background (e.g. started automatically at login), stop it first (`ollama stop` or quit from the system tray), then start it with the command above.
+> **Note:** If Ollama is already running in the background (auto-started at login), quit it first via the system tray before using the temporary method.
 
 ### 4. Use in Archillator
 
@@ -273,11 +312,12 @@ Keep this terminal window open while using the Archillator.
 - Very large files may hit browser memory limits
 - API rate limits may slow down translation of large documents
 - Checkpoint size limited by localStorage (~5-10 MB)
+- **Passage mode sends the pasted text as a single request.** Document mode splits the text into batches, passage mode does not — so a very long passage can exceed the model's output limit. Paste less at a time, or use Document mode. This bites soonest with OpenRouter's free reasoning models, which burn their output budget on thinking.
 
 ## Comparison with DeepL
 
-| Feature | Academic Text Translator | DeepL Pro |
-|---------|-------------------------|-----------|
+| Feature | Archillator | DeepL Pro |
+|---------|-------------|-----------|
 | File size limit | Unlimited* | 1 million chars |
 | Files per month | Unlimited | 3-5 depending on plan |
 | Content filtering | Minimal (Claude) | Moderate |
