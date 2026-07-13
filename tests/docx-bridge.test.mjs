@@ -89,7 +89,7 @@ test("Identitaets-Roundtrip: ohne Uebersetzung bleibt alles gleich", async () =>
   assert.match(after, /w:val="Heading1"/);
   assert.match(after, /<w:sectPr>/);
   // Text unveraendert
-  assert.match(after, /The Jewish War/);
+  assert.match(after, /Jewish War/);
   assert.match(after, /Josephus in /);
   // Fussnoten unangetastet, inkl. automatischer Nummer
   const fn = await zip.file("word/footnotes.xml").async("string");
@@ -162,7 +162,7 @@ test("Report: fehlende, fehlerhafte und markerkaputte Uebersetzungen", async () 
   // Die drei Faelle behalten ihr Original; NIE eine Fehlermeldung im Dokument.
   const doc = await zip.file("word/document.xml").async("string");
   assert.match(doc, /INTRODUCTION/);
-  assert.match(doc, /The Jewish War/, "markerkaputter Absatz bleibt im Original");
+  assert.match(doc, /Jewish War/, "markerkaputter Absatz bleibt im Original");
   assert.doesNotMatch(doc, /ERROR/, "keine Fehlermeldung im Dokument");
   const fn = await zip.file("word/footnotes.xml").async("string");
   assert.doesNotMatch(fn, /ERROR/);

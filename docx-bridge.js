@@ -59,8 +59,16 @@
 
   // Runs eines <w:p> zu markiertem Text: _kursiv_, [^n] fuer Fussnotenreferenzen,
   // \t fuer Tabulatoren.
+  //
+  // Word zerlegt zusammenhaengenden Text staendig in mehrere Runs (Rechtschreib- und
+  // Revisionsmarken). Zwei aufeinanderfolgende kursive Runs duerfen NICHT je einzeln
+  // ausgezeichnet werden - sonst entsteht "_A. __Introduction_" statt
+  // "_A. Introduction_". Solche Doppel-Unterstriche verwirren das Uebersetzungsmodell
+  // und der Kursivsatz geht verloren, sobald es sie normalisiert. Darum: benachbarte
+  // Runs gleicher Auszeichnung erst zusammenfassen, dann markieren.
   function serializeParagraph(pEl) {
-    var out = "";
+    var parts = []; // {italic: bool, text: string} - Refs als eigene Teile
+
     runsOf(pEl).forEach(function (child) {
       var text = "";
       var refs = "";
@@ -76,10 +84,21 @@
         }
       });
       if (isNumberRun) text = "";
-      if (text) out += isItalic(child) ? "_" + text + "_" : text;
-      out += refs;
+
+      if (text) {
+        var italic = isItalic(child);
+        var last = parts[parts.length - 1];
+        if (last && last.italic === italic && !last.isRef) last.text += text;
+        else parts.push({ italic: italic, text: text, isRef: false });
+      }
+      if (refs) parts.push({ italic: false, text: refs, isRef: true });
     });
-    return out;
+
+    return parts
+      .map(function (part) {
+        return part.italic && !part.isRef ? "_" + part.text + "_" : part.text;
+      })
+      .join("");
   }
 
   // Traegt der Absatz uebersetzbaren Text (mindestens ein nichtleeres w:t)?

@@ -21,7 +21,8 @@ const DOCUMENT_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 </w:p>
 <w:p>
   <w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t xml:space="preserve">Josephus in </w:t></w:r>
-  <w:r><w:rPr><w:i/><w:sz w:val="24"/></w:rPr><w:t>The Jewish War</w:t></w:r>
+  <w:r><w:rPr><w:i/><w:sz w:val="24"/></w:rPr><w:t xml:space="preserve">The </w:t></w:r>
+  <w:r><w:rPr><w:i/><w:sz w:val="24"/></w:rPr><w:t>Jewish War</w:t></w:r>
   <w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t xml:space="preserve"> says so.</w:t></w:r>
   <w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteReference w:id="1"/></w:r>
   <w:r><w:rPr><w:sz w:val="24"/></w:rPr><w:t xml:space="preserve"> And again.</w:t></w:r>
