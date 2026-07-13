@@ -9,10 +9,11 @@ const src = readFileSync(new URL("../docx-bridge.js", import.meta.url), "utf-8")
 new Function(src).call(globalThis);
 const { docxToItems, itemsToDocx } = globalThis;
 
-// Fremddokument (academia.edu), absichtlich nicht im Repo - dieses Repo ist oeffentlich.
-// Der Test ueberspringt sich, wenn die Datei fehlt.
-const JOSEPHUS =
-  "C:/Users/tomra/archilles-scriptor/corpora/books/Josephus and his Historiographi - Jon (bereinigt).docx";
+// Integrationstest an einem echten, fussnotenreichen Dokument. Die Datei liegt
+// absichtlich nicht im Repo (fremdes Paper, oeffentliches Repo) - der Test ueberspringt
+// sich, wenn sie fehlt. Eigenes Dokument einhaengen:
+//   ARCHILLATOR_TEST_DOCX="/pfad/zu/dokument.docx" npm test
+const JOSEPHUS = process.env.ARCHILLATOR_TEST_DOCX || "";
 
 test("Josephus: Identitaets-Roundtrip erhaelt 85 Fussnoten und 7 Ueberschriften", async (t) => {
   if (!existsSync(JOSEPHUS)) return t.skip("Josephus-DOCX nicht vorhanden");
