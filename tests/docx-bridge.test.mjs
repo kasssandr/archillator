@@ -139,6 +139,50 @@ test("Rueckbau einer Fussnote: Nummer bleibt, Text ist nicht hochgestellt", asyn
   assert.equal(styleCount, 1, "nur die Nummer traegt den hochgestellten Stil");
 });
 
+test("Modelle schreiben *kursiv* statt _kursiv_ - das darf keine Leiche hinterlassen", async () => {
+  const original = await buildMiniDocx();
+  const items = await docxToItems(original);
+  // Genau das ist am Noam-Dokument passiert: Das Modell uebersetzt den Marker mit.
+  const translations = items.map((i) =>
+    i.source === "body" && i.text.startsWith("Josephus")
+      ? "Josephus in *Der Juedische Krieg* sagt es.[^1] Und nochmals.[^2]"
+      : null,
+  );
+
+  const { zip, report } = await itemsToDocx(original, items, translations);
+  const doc = await zip.file("word/document.xml").async("string");
+  const idx = items.findIndex((i) => i.text.startsWith("Josephus"));
+
+  assert.match(doc, /Der Juedische Krieg/);
+  assert.match(doc, /<w:i\/>/, "als Kursiv erkannt, nicht als Literal");
+  assert.doesNotMatch(doc, /\*Der Juedische Krieg\*/, "keine Sternchen im Dokument");
+  assert.ok(!report.some((r) => r.index === idx), "Sternchen-Kursiv ist kein Fehler");
+});
+
+test("Fehlende Auszeichnung: Text wird eingesetzt, Verlust wird gemeldet", async () => {
+  const original = await buildMiniDocx();
+  const items = await docxToItems(original);
+  // Das Modell laesst die Kursiv-Auszeichnung ganz weg.
+  const translations = items.map((i) =>
+    i.source === "body" && i.text.startsWith("Josephus")
+      ? "Josephus in Der Juedische Krieg sagt es.[^1] Und nochmals.[^2]"
+      : null,
+  );
+
+  const { zip, report } = await itemsToDocx(original, items, translations);
+  const doc = await zip.file("word/document.xml").async("string");
+  const idx = items.findIndex((i) => i.text.startsWith("Josephus"));
+  const entry = report.find((r) => r.index === idx);
+
+  // Der uebersetzte Text kommt trotzdem ins Dokument - Text schlaegt Kursivsatz.
+  assert.match(doc, /Der Juedische Krieg/);
+  assert.doesNotMatch(doc, /The Jewish/, "nicht auf das Original zurueckgefallen");
+  // ... aber der Verlust wird gemeldet, statt still zu passieren.
+  assert.ok(entry, "Verlust der Auszeichnung steht im Bericht");
+  assert.equal(entry.kept, true, "als Hinweis markiert, nicht als Blocker");
+  assert.match(entry.reason, /Auszeichnung/i);
+});
+
 test("Report: fehlende, fehlerhafte und markerkaputte Uebersetzungen", async () => {
   const original = await buildMiniDocx();
   const items = await docxToItems(original);

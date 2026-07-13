@@ -211,6 +211,16 @@
         });
         continue;
       }
+      var note = emphasisNote(item, translations[i]);
+      if (note) {
+        report.push({
+          index: i,
+          reason: note,
+          sample: item.text.slice(0, 70),
+          kept: true, // Uebersetzung wird trotzdem eingesetzt
+        });
+      }
+
       var target =
         item.source === "body" ? bodyParas[item.paraIndex] : fnParas[item.paraIndex];
       if (!target) continue;
@@ -223,9 +233,14 @@
   }
 
   // "Text _kursiv_ mehr[^3]\tTab" -> Segmente
+  //
+  // *kursiv* wird bewusst ebenso akzeptiert: Uebersetzungsmodelle schreiben den Marker
+  // gerne in die andere Markdown-Konvention um (am Noam-Dokument aus '_Antiquities_'
+  // ein '*Antiquitates*'). Wer das nicht toleriert, bekommt Sternchen als Literal ins
+  // Dokument und verliert den Kursivsatz.
   function parseMarkedText(text) {
     var segments = [];
-    var re = /_([^_]+)_|\[\^(\d+)\]|\t/g;
+    var re = /_([^_]+)_|\*([^*]+)\*|\[\^(\d+)\]|\t/g;
     var last = 0;
     var m;
     while ((m = re.exec(text)) !== null) {
@@ -233,7 +248,8 @@
         segments.push({ kind: "normal", text: text.slice(last, m.index) });
       }
       if (m[1] !== undefined) segments.push({ kind: "italic", text: m[1] });
-      else if (m[2] !== undefined) segments.push({ kind: "footnoteRef", id: parseInt(m[2], 10) });
+      else if (m[2] !== undefined) segments.push({ kind: "italic", text: m[2] });
+      else if (m[3] !== undefined) segments.push({ kind: "footnoteRef", id: parseInt(m[3], 10) });
       else segments.push({ kind: "tab" });
       last = re.lastIndex;
     }
@@ -367,16 +383,56 @@
     return null;
   }
 
+  // Zaehlt Kursiv-Auszeichnungen. *x* zaehlt mit - Modelle schreiben den Marker um.
+  function emphasisCount(text) {
+    return (text.match(/_[^_]+_|\*[^*]+\*/g) || []).length;
+  }
+
+  // Kein Blocker, sondern ein Hinweis: Der uebersetzte Text wird eingesetzt (Text
+  // schlaegt Kursivsatz), aber der Verlust darf nicht still passieren.
+  function emphasisNote(item, translated) {
+    var want = emphasisCount(item.text);
+    var got = emphasisCount(translated);
+    if (want === got) return null;
+    if (got < want) {
+      return "Kursiv-Auszeichnung fehlt in der Uebersetzung (" + got + " statt " + want + ")";
+    }
+    return "mehr Kursiv-Auszeichnungen als im Original (" + got + " statt " + want + ")";
+  }
+
   // Nach Dokumentposition sortiert, je Eintrag ein suchbares Textbeispiel -
   // interne Indizes sind im Textverarbeiter unsichtbar.
   function formatReport(report) {
     if (!report.length) return "Keine Beanstandungen. Alle Absaetze uebersetzt.\n";
-    var lines = ["Pruefbericht - " + report.length + " Stelle(n), Original eingesetzt:", ""];
-    report.forEach(function (entry) {
-      lines.push("Abs. " + entry.index + "  " + entry.reason);
-      lines.push('   "' + entry.sample + '"');
+
+    var blocked = report.filter(function (e) {
+      return !e.kept;
     });
-    return lines.join("\n") + "\n";
+    var kept = report.filter(function (e) {
+      return e.kept;
+    });
+    var lines = [];
+
+    function section(title, entries) {
+      if (!entries.length) return;
+      lines.push(title);
+      lines.push("");
+      entries.forEach(function (entry) {
+        lines.push("Abs. " + entry.index + "  " + entry.reason);
+        lines.push('   "' + entry.sample + '"');
+      });
+      lines.push("");
+    }
+
+    section(
+      "NICHT UEBERNOMMEN - " + blocked.length + " Stelle(n), Original eingesetzt:",
+      blocked,
+    );
+    section(
+      "UEBERSETZT, ABER FORMATIERUNG PRUEFEN - " + kept.length + " Stelle(n):",
+      kept,
+    );
+    return lines.join("\n");
   }
 
   root.docxToItems = docxToItems;
