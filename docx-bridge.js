@@ -79,9 +79,39 @@
     return false;
   }
 
+  // Fussnoten-IDs in Referenz-Reihenfolge eines Absatzes.
+  function footnoteIdsOf(pEl) {
+    var ids = [];
+    var refs = pEl.getElementsByTagNameNS(W, "footnoteReference");
+    for (var i = 0; i < refs.length; i++) {
+      ids.push(parseInt(refs[i].getAttribute("w:id"), 10));
+    }
+    return ids;
+  }
+
   async function docxToItems(zip) {
     var docXml = parseXml(await zip.file("word/document.xml").async("string"));
     var paragraphs = docXml.getElementsByTagNameNS(W, "p");
+
+    // footnotes.xml ist optional (nicht jedes DOCX hat Fussnoten).
+    var fnFile = zip.file("word/footnotes.xml");
+    var fnParaIdxById = {}; // fnId -> Index des <w:p> in footnotes.xml
+    var fnTextById = {}; // fnId -> markierter Text
+    if (fnFile) {
+      var fnXml = parseXml(await fnFile.async("string"));
+      var notes = fnXml.getElementsByTagNameNS(W, "footnote");
+      var allFnParas = fnXml.getElementsByTagNameNS(W, "p");
+      for (var n = 0; n < notes.length; n++) {
+        var id = parseInt(notes[n].getAttribute("w:id"), 10);
+        if (isNaN(id) || id < 1) continue; // separator / continuationSeparator
+        var p = notes[n].getElementsByTagNameNS(W, "p")[0];
+        if (!p || !hasText(p)) continue;
+        for (var k = 0; k < allFnParas.length; k++) {
+          if (allFnParas[k] === p) fnParaIdxById[id] = k;
+        }
+        fnTextById[id] = serializeParagraph(p).trim();
+      }
+    }
 
     var items = [];
     for (var i = 0; i < paragraphs.length; i++) {
@@ -91,6 +121,18 @@
         source: "body",
         paraIndex: i,
         fnId: null,
+      });
+      // Die Fussnote gehoert direkt hinter ihren Absatz: Das Modell sieht sie im
+      // Zusammenhang ("Ebd." bezieht sich auf das eben Gelesene) und es entsteht
+      // kein Block kontextloser Kurzbelege, den Modelle zu verweigern neigen.
+      footnoteIdsOf(paragraphs[i]).forEach(function (fnId) {
+        if (!(fnId in fnTextById)) return;
+        items.push({
+          text: fnTextById[fnId],
+          source: "footnotes",
+          paraIndex: fnParaIdxById[fnId],
+          fnId: fnId,
+        });
       });
     }
     return items;
