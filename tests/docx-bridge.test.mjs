@@ -14,7 +14,7 @@ test("Body-Absaetze werden mit Marker-Text serialisiert", async () => {
   const body = items.filter((i) => i.source === "body");
 
   assert.equal(body.length, 2, "leerer Absatz erzeugt kein Item");
-  assert.equal(body[0].text, "INTRODUCTION");
+  assert.equal(body[0].text, "I\tINTRODUCTION", "Tabulator bleibt erhalten");
   assert.equal(body[0].paraIndex, 0);
   assert.equal(
     body[1].text,
@@ -38,7 +38,42 @@ test("Fussnoten stehen direkt hinter ihrem referenzierenden Absatz", async () =>
   );
   // Die automatische Nummer (<w:footnoteRef/>) darf NICHT im Text stehen.
   assert.equal(items[2].text, "Hadas-Lebel, 1993:51.");
-  assert.equal(items[3].text, "Ibid.");
+  // Runs in Wrappern (hier <w:hyperlink>) muessen mitgelesen werden - sonst fehlt
+  // ihr Text in der Uebersetzung und bleibt beim Rueckbau als Leiche stehen.
+  assert.equal(items[3].text, "Vgl. Acts 23:11 und Ibid.");
+});
+
+test("Wrapper-Runs (Hyperlink): Text wandert nicht und wird nicht dupliziert", async () => {
+  const original = await buildMiniDocx();
+  const items = await docxToItems(original);
+  const translations = items.map((i) =>
+    i.fnId === 2 ? "Vgl. Apg 23:11 und ebd." : null,
+  );
+
+  const { zip, report } = await itemsToDocx(original, items, translations);
+  const fn = await zip.file("word/footnotes.xml").async("string");
+  const note2 = fn.split('w:id="2"')[1].split("</w:footnote>")[0];
+
+  const idx = items.findIndex((i) => i.fnId === 2);
+  assert.ok(!report.some((r) => r.index === idx), "die Uebersetzung ist sauber");
+  assert.match(note2, /Vgl\. Apg 23:11 und ebd\./);
+  // Der alte Hyperlink-Run darf nicht als Leiche stehenbleiben.
+  assert.doesNotMatch(note2, /Acts 23:11/, "Original-Wrapper entfernt");
+  assert.doesNotMatch(note2, /<w:hyperlink/, "Wrapper-Element entfernt");
+});
+
+test("Tabulator ueberlebt den Rueckbau", async () => {
+  const original = await buildMiniDocx();
+  const items = await docxToItems(original);
+  const translations = items.map((i, n) => (n === 0 ? "I\tEINLEITUNG" : null));
+
+  const { zip, report } = await itemsToDocx(original, items, translations);
+  const doc = await zip.file("word/document.xml").async("string");
+
+  assert.ok(!report.some((r) => r.index === 0), "die Uebersetzung ist sauber");
+  assert.match(doc, /<w:tab\/>/, "Tab als Element rekonstruiert");
+  assert.match(doc, /EINLEITUNG/);
+  assert.doesNotMatch(doc, /I\tEINLEITUNG/, "Tab nicht als Literaltext im w:t");
 });
 
 test("Identitaets-Roundtrip: ohne Uebersetzung bleibt alles gleich", async () => {

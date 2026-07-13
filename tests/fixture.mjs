@@ -7,12 +7,16 @@ export function loadGlobals() {
   globalThis.JSZip = JSZip;
 }
 
-const W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"';
+const W =
+  'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" ' +
+  'xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
 
 // Absatz 0: Heading1. Absatz 1: Fliesstext mit Kursiv + 2 Fussnoten. Absatz 2: leer.
 const DOCUMENT_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document ${W}><w:body>
 <w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr>
+  <w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>I</w:t></w:r>
+  <w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:tab/></w:r>
   <w:r><w:rPr><w:b/><w:sz w:val="28"/></w:rPr><w:t>INTRODUCTION</w:t></w:r>
 </w:p>
 <w:p>
@@ -37,7 +41,9 @@ const FOOTNOTES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 </w:p></w:footnote>
 <w:footnote w:id="2"><w:p><w:pPr><w:pStyle w:val="FootnoteText"/></w:pPr>
   <w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteRef/></w:r>
-  <w:r><w:t xml:space="preserve"> Ibid.</w:t></w:r>
+  <w:r><w:t xml:space="preserve"> Vgl. </w:t></w:r>
+  <w:hyperlink r:id="rId1"><w:r><w:t>Acts 23:11</w:t></w:r></w:hyperlink>
+  <w:r><w:t xml:space="preserve"> und Ibid.</w:t></w:r>
 </w:p></w:footnote>
 </w:footnotes>`;
 

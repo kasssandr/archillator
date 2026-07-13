@@ -46,17 +46,29 @@
     return italic;
   }
 
-  // Runs eines <w:p> zu markiertem Text: _kursiv_, [^n] fuer Fussnotenreferenzen.
+  // Alle Runs eines <w:p> in Dokumentreihenfolge - auch die in Wrappern.
+  // Runs stecken nicht immer direkt unter <w:p>: <w:hyperlink> (im Josephus in einer
+  // Fussnote), <w:smartTag>, <w:ins> umschliessen sie. Wer nur die direkten Kinder
+  // liest, unterschlaegt deren Text - und laesst sie beim Rueckbau als Leiche stehen.
+  function runsOf(pEl) {
+    var runs = pEl.getElementsByTagNameNS(W, "r");
+    var out = [];
+    for (var i = 0; i < runs.length; i++) out.push(runs[i]);
+    return out;
+  }
+
+  // Runs eines <w:p> zu markiertem Text: _kursiv_, [^n] fuer Fussnotenreferenzen,
+  // \t fuer Tabulatoren.
   function serializeParagraph(pEl) {
     var out = "";
-    childElements(pEl).forEach(function (child) {
-      if (tag(child) !== "r") return;
+    runsOf(pEl).forEach(function (child) {
       var text = "";
       var refs = "";
       var isNumberRun = false;
       childElements(child).forEach(function (node) {
         var name = tag(node);
         if (name === "t") text += node.textContent || "";
+        else if (name === "tab") text += "\t";
         else if (name === "footnoteReference") {
           refs += "[^" + node.getAttribute("w:id") + "]";
         } else if (name === "footnoteRef") {
@@ -191,10 +203,10 @@
     return { zip: out, report: report };
   }
 
-  // "Text _kursiv_ mehr[^3]" -> Segmente
+  // "Text _kursiv_ mehr[^3]\tTab" -> Segmente
   function parseMarkedText(text) {
     var segments = [];
-    var re = /_([^_]+)_|\[\^(\d+)\]/g;
+    var re = /_([^_]+)_|\[\^(\d+)\]|\t/g;
     var last = 0;
     var m;
     while ((m = re.exec(text)) !== null) {
@@ -202,7 +214,8 @@
         segments.push({ kind: "normal", text: text.slice(last, m.index) });
       }
       if (m[1] !== undefined) segments.push({ kind: "italic", text: m[1] });
-      else segments.push({ kind: "footnoteRef", id: parseInt(m[2], 10) });
+      else if (m[2] !== undefined) segments.push({ kind: "footnoteRef", id: parseInt(m[2], 10) });
+      else segments.push({ kind: "tab" });
       last = re.lastIndex;
     }
     if (last < text.length) segments.push({ kind: "normal", text: text.slice(last) });
@@ -237,9 +250,7 @@
   // Vorlage-rPr: erster Run mit w:t-Text. Bei Fussnoten ausdruecklich NICHT der
   // Nummern-Run - dessen Stil ist hochgestellt und wuerde den ganzen Text hochstellen.
   function templateRPr(pEl) {
-    var runs = childElements(pEl).filter(function (c) {
-      return tag(c) === "r";
-    });
+    var runs = runsOf(pEl);
     for (var i = 0; i < runs.length; i++) {
       if (isFootnoteRefRun(runs[i])) continue;
       if (runs[i].getElementsByTagNameNS(W, "t").length === 0) continue;
@@ -276,6 +287,11 @@
     }
     if (childElements(rPr).length) run.appendChild(rPr);
 
+    if (segment.kind === "tab") {
+      run.appendChild(doc.createElementNS(W, "w:tab"));
+      return run;
+    }
+
     var t = doc.createElementNS(W, "w:t");
     t.setAttribute("xml:space", "preserve");
     t.appendChild(doc.createTextNode(segment.text));
@@ -287,13 +303,20 @@
     var doc = pEl.ownerDocument;
     var rPrTemplate = templateRPr(pEl);
 
-    // Alte Runs entfernen. Bei Fussnoten bleibt der Nummern-Run stehen, sonst
-    // verschwindet die Fussnotennummer. w:pPr wird nie angefasst - damit ueberleben
-    // Style (Heading1), Ausrichtung, Abstaende, Einzuege.
+    // Alte Inhalte entfernen: Runs UND ihre Wrapper (<w:hyperlink>, <w:smartTag>,
+    // <w:ins> ...). Ein stehengebliebener Wrapper wuerde seinen Text doppelt und an
+    // falscher Stelle ins Dokument bringen. Die Verlinkung selbst geht dabei verloren,
+    // der Text ueberlebt uebersetzt - Textverlust waere das schwerere Uebel.
+    // Bei Fussnoten bleibt der Nummern-Run stehen, sonst verschwindet die Nummer.
+    // w:pPr wird nie angefasst - damit ueberleben Style (Heading1), Ausrichtung,
+    // Abstaende, Einzuege.
     childElements(pEl).forEach(function (child) {
-      if (tag(child) !== "r") return;
-      if (isFootnote && isFootnoteRefRun(child)) return;
-      pEl.removeChild(child);
+      var name = tag(child);
+      if (name === "pPr") return;
+      if (isFootnote && name === "r" && isFootnoteRefRun(child)) return;
+      if (name === "r" || child.getElementsByTagNameNS(W, "r").length > 0) {
+        pEl.removeChild(child);
+      }
     });
 
     // Fussnotentext beginnt konventionell mit einem Leerzeichen nach der Nummer.
