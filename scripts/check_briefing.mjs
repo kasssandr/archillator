@@ -7,6 +7,10 @@ const checks = [
   ["Marker ^n^ gebrieft", /\^n\^/, 1],
   ["Marker ⟦…⟧ gebrieft", /⟦…⟧/, 1],
   ["DNT-Marker <dnt>…</dnt> gebrieft", /<dnt>…<\/dnt>/, 1],
+  ["Markdown-Fussnotenmarker [^n] gebrieft", /\[\^n\]/, 1],
+  ["docx-bridge eingebunden", /<script src="docx-bridge\.js"><\/script>/, 1],
+  ["DOCX-Export nutzt itemsToDocx (kein Neubau)", /itemsToDocx\(originalDocxZip/, 1],
+  ["DOCX-Import nutzt docxToItems (kein extractRawText)", /docxToItems\(originalDocxZip\)/, 1],
 ];
 let ok = true;
 for (const [name, re, min] of checks) {
