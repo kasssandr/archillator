@@ -1,44 +1,58 @@
 name: Sync Archillator to archilles.org
 
-# DISABLED 2026-05-20 — auto-sync neutralisiert.
-# Diese Action kopierte archillator.html (alte Design-Version) per rohem `cp`
-# nach archilles.org/archillator/index.html und ÜBERSCHRIEB damit das kanonische
-# Live-Tool (neues Design + Ollama + MD + lokale Fonts + Site-Navbar), das jetzt
-# direkt im archilles.org-Repo gepflegt wird. Der Push-Trigger ist deshalb
-# entfernt; die Action läuft nur noch manuell. NICHT wieder auf push umstellen,
-# ohne vorher die Source-of-Truth zu klären und einen Fonts/Navbar-Anpassungs-
-# schritt einzubauen.
+# Repariert und wieder aktiviert 2026-07-14.
+#
+# Source of Truth ist `index.html` in DIESEM Repo (kasssandr/archillator).
+# `archilles.org/archillator/index.html` ist eine reine Kopie davon -
+# dort NICHT direkt editieren, Aenderungen dort werden beim naechsten Sync
+# ueberschrieben.
+#
+# Vorgeschichte: Die alte Fassung kopierte `archillator.html` (die aufgegebene
+# Design-Variante, heute `archillator(old design).html`) und ein `favicon.svg`,
+# das es hier nie gab. Sie haette das Live-Tool mit dem alten Design ueberschrieben
+# und wurde deshalb am 2026-05-20 auf workflow_dispatch reduziert. Seitdem ist die
+# Design-Variante endgueltig aufgegeben: online steht dieselbe nuechterne
+# Single-File-Fassung wie hier, ein stumpfes Kopieren ist also wieder korrekt.
+
 on:
+  push:
+    branches: [main]
+    paths:
+      - index.html
+      - .github/workflows/sync-to-website.yml
   workflow_dispatch:
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout archillator repo
+      - name: Checkout archillator repo (Quelle)
         uses: actions/checkout@v4
 
-      - name: Checkout archilles.org repo
+      - name: Checkout archilles.org repo (Ziel)
         uses: actions/checkout@v4
         with:
           repository: kasssandr/archilles.org
           token: ${{ secrets.WEBSITE_SYNC_TOKEN }}
           path: website
 
-      - name: Copy files
+      - name: Quelle und Ziel pruefen
         run: |
-          cp archillator.html website/archillator/index.html
-          cp favicon.svg website/archillator/favicon.svg
+          test -f index.html || { echo "index.html fehlt im Quell-Repo"; exit 1; }
+          test -d website/archillator || { echo "website/archillator/ fehlt im Ziel-Repo"; exit 1; }
+
+      - name: Kopieren
+        run: cp index.html website/archillator/index.html
 
       - name: Commit and push
         run: |
           cd website
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add archillator/
+          git add archillator/index.html
           if git diff --staged --quiet; then
-            echo "No changes to sync"
+            echo "Keine Aenderung - nichts zu synchronisieren."
           else
-            git commit -m "Sync archillator from source repo"
+            git commit -m "sync(archillator): index.html aus dem Quell-Repo (${GITHUB_SHA::7})"
             git push
           fi
