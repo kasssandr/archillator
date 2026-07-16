@@ -5,7 +5,7 @@ import JSZip from "jszip";
 import { loadGlobals } from "./fixture.mjs";
 
 loadGlobals();
-const src = readFileSync(new URL("../docx-bridge.js", import.meta.url), "utf-8");
+const src = readFileSync(new URL("../js/docx-bridge.js", import.meta.url), "utf-8");
 new Function(src).call(globalThis);
 const { docxToItems, itemsToDocx } = globalThis;
 

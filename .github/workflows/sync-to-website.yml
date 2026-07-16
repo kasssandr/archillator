@@ -1,24 +1,17 @@
 name: Sync Archillator to archilles.org
 
-# Repariert und wieder aktiviert 2026-07-14.
+# Source of Truth ist DIESES Repo (kasssandr/archillator).
+# archilles.org/archillator/ ist eine Kopie — dort NICHT direkt editieren.
 #
-# Source of Truth ist `index.html` in DIESEM Repo (kasssandr/archillator).
-# `archilles.org/archillator/index.html` ist eine reine Kopie davon -
-# dort NICHT direkt editieren, Aenderungen dort werden beim naechsten Sync
-# ueberschrieben.
-#
-# Vorgeschichte: Die alte Fassung kopierte `archillator.html` (die aufgegebene
-# Design-Variante, heute `archillator(old design).html`) und ein `favicon.svg`,
-# das es hier nie gab. Sie haette das Live-Tool mit dem alten Design ueberschrieben
-# und wurde deshalb am 2026-05-20 auf workflow_dispatch reduziert. Seitdem ist die
-# Design-Variante endgueltig aufgegeben: online steht dieselbe nuechterne
-# Single-File-Fassung wie hier, ein stumpfes Kopieren ist also wieder korrekt.
+# Produkt = index.html + js/ (DOCX-Bridge). Beides muss mitwandern.
+# Single-File-Sync (nur index.html) ist absichtlich aufgegeben.
 
 on:
   push:
     branches: [main]
     paths:
       - index.html
+      - js/**
       - .github/workflows/sync-to-website.yml
   workflow_dispatch:
 
@@ -39,20 +32,24 @@ jobs:
       - name: Quelle und Ziel pruefen
         run: |
           test -f index.html || { echo "index.html fehlt im Quell-Repo"; exit 1; }
+          test -f js/docx-bridge.js || { echo "js/docx-bridge.js fehlt im Quell-Repo"; exit 1; }
           test -d website/archillator || { echo "website/archillator/ fehlt im Ziel-Repo"; exit 1; }
 
       - name: Kopieren
-        run: cp index.html website/archillator/index.html
+        run: |
+          cp index.html website/archillator/index.html
+          mkdir -p website/archillator/js
+          cp js/docx-bridge.js website/archillator/js/docx-bridge.js
 
       - name: Commit and push
         run: |
           cd website
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add archillator/index.html
+          git add archillator/index.html archillator/js/docx-bridge.js
           if git diff --staged --quiet; then
             echo "Keine Aenderung - nichts zu synchronisieren."
           else
-            git commit -m "sync(archillator): index.html aus dem Quell-Repo (${GITHUB_SHA::7})"
+            git commit -m "sync(archillator): Web-Dateien aus dem Quell-Repo (${GITHUB_SHA::7})"
             git push
           fi

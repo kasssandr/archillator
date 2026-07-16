@@ -1,1 +1,19 @@
+# Test dependencies
 tests/node_modules/
+
+# Editor / agent local
+.claude/
+.idea/
+.vscode/
+*.swp
+*~
+
+# Python (optional desktop helper)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
