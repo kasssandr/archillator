@@ -17,11 +17,28 @@ A browser-based translation tool for academic texts, designed for researchers an
 
 ## Quick Start
 
-1. Open `index.html` in any modern browser — the tool is a single self-contained file, so you can copy it anywhere and run it locally
-2. Enter your API key (Gemini, OpenAI, Anthropic, or OpenRouter) — or pick Ollama and use no key at all
-3. Choose your target language and style
-4. Either paste text (Passage mode, Proofread mode) or upload a file (Document mode)
-5. Click translate and download the result
+**Online:** open [archilles.org/archillator/](https://archilles.org/archillator/) — no install.
+
+**Local (folder, not a single file):**
+
+1. Clone this repo, or download a ZIP from GitHub (**Code → Download ZIP**)
+2. Keep `index.html` and the `js/` folder together
+3. Open `index.html` in a modern browser
+4. Enter your API key (Gemini, OpenAI, Anthropic, or OpenRouter) — or pick Ollama and use no key at all
+5. Choose target language and style → paste text or upload a file → translate
+
+There is no backend. Keys stay in your browser’s localStorage and go only to the API you choose.
+
+### Offline ZIP: GitHub or homepage?
+
+**Prefer GitHub** as the download host:
+
+| Source | Role |
+|--------|------|
+| **GitHub → Download ZIP** (or a **Release**) | Source of truth, always in sync with the code |
+| **Homepage** | Optional “Local use” *link* to that ZIP/Release — don’t maintain a second copy |
+
+See also [docs/STRUCTURE.md](docs/STRUCTURE.md).
 
 ## Supported Providers & Models
 
@@ -300,11 +317,13 @@ $env:OLLAMA_ORIGINS="*"; ollama serve
 ## Technical Details
 
 - Pure client-side JavaScript – no server required
-- Uses mammoth.js for DOCX reading
-- Uses docx.js for DOCX writing
-- Uses JSZip for EPUB handling
+- **Layout:** `index.html` (UI + translation logic) + `js/docx-bridge.js` (DOCX in/out via ZIP clone)
+- **JSZip** for DOCX and EPUB as ZIP archives
+- DOCX export keeps the original package structure (styles, footnotes, headings) where possible
 - All processing happens in your browser
 - No data is sent anywhere except to the translation API you choose
+- Optional Windows hotkey helper: `scripts/archillator_desktop.py` (not the web app; see `requirements.txt`)
+- Old single-file / design experiments live under `archive/` and are **not** the product
 
 ## Limitations
 
@@ -331,10 +350,23 @@ $env:OLLAMA_ORIGINS="*"; ollama serve
 
 MIT License – free for personal and commercial use.
 
+## Repo map
+
+| Path | Role |
+|------|------|
+| `index.html` | Web UI and translation orchestration |
+| `js/docx-bridge.js` | Academic DOCX round-trip |
+| `tests/` | Automated tests (mainly the bridge) |
+| `scripts/` | Helpers (briefing check; optional desktop tool) |
+| `archive/` | Retired designs — not shipped as the product |
+| `docs/STRUCTURE.md` | Product decisions and layout |
+
+Website sync copies `index.html` and `js/docx-bridge.js` to archilles.org. Edit only in **this** repo.
+
 ## Contributing
 
 This tool is part of the Archilles project. For bug reports, feature requests, or contributions, please visit [archilles.org](https://archilles.org).
 
 ---
 
-*Built with ❤️ for the humanities research community*
+*Built for the humanities research community*

@@ -5,7 +5,7 @@ import { buildMiniDocx, loadGlobals } from "./fixture.mjs";
 
 loadGlobals();
 // docx-bridge.js ist ein klassisches Script (kein ES-Modul) -> in den globalen Scope laden.
-const src = readFileSync(new URL("../docx-bridge.js", import.meta.url), "utf-8");
+const src = readFileSync(new URL("../js/docx-bridge.js", import.meta.url), "utf-8");
 new Function(src).call(globalThis);
 const { docxToItems, itemsToDocx } = globalThis;
 
