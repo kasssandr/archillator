@@ -64,6 +64,14 @@ Archillator sitzt neben:
 Erfordernisse aus Scriptor können später hier ankommen (Marker, Formate, Batch).  
 Die Multi-Datei-Struktur und getrennte Bridge sind dafür vorbereitet — ohne dass heute schon alles spekulativ gebaut wird.
 
+> **Spiegel-Notiz (Familie), 2026-07-19:** Das Übergabeformat ist jetzt
+> normiert: [PREPARED_FORMAT_SPEC v0.1](https://github.com/kasssandr/archilles-scriptor/blob/main/docs/PREPARED_FORMAT_SPEC.md)
+> im Scriptor-Repo. Für Archillator verbindlich: §7 (dnt-Konvention —
+> `<dnt>…</dnt>` zeichengetreu durch die Übersetzung tragen, danach Tags
+> entfernen, Strukturmarker `[^N]`/`[p. …]` unverändert übernehmen) und die
+> §12-Garantie „eine Zitatadresse übersteht die Übersetzung". Der
+> translate-prep-Kontrakt ist damit Spec, nicht mehr Konvention.
+
 ## Desktop-Skript
 
 `scripts/archillator_desktop.py` ist ein **separates** Windows-Hilfsmittel (Hotkey, Clipboard, Gemini).  

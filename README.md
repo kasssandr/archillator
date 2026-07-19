@@ -365,7 +365,18 @@ Website sync copies `index.html` and `js/docx-bridge.js` to archilles.org. Edit 
 
 ## Contributing
 
-This tool is part of the Archilles project. For bug reports, feature requests, or contributions, please visit [archilles.org](https://archilles.org).
+Scriptor prepares, Archilles retrieves, Archillator translates — three tools,
+one path: from the printed apparatus to a citable answer, in any language, on
+your own machine. Each tool stands alone; none requires the others. All three
+are developed under one fixed charter: **local-first, source-true, the scholar
+as the acting subject**. Contributions are welcome within that charter; beyond
+it, the license invites forks.
+
+The interchange contract of the family — the *prepared document* — is specified
+in [PREPARED_FORMAT_SPEC](https://github.com/kasssandr/archilles-scriptor/blob/main/docs/PREPARED_FORMAT_SPEC.md);
+for Archillator its §7 (the `<dnt>` convention) is the binding part.
+
+For bug reports, feature requests, or contributions, please visit [archilles.org](https://archilles.org).
 
 ---
 
