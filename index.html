@@ -1983,12 +1983,15 @@ ${text}`;
 - [^n]: …   footnote definition (a line starting with the marker): keep the marker and the colon EXACTLY; DO translate the footnote text that follows it. Never merge such a line into a neighbouring paragraph.
 - #, ##   Markdown heading marks: keep the leading hashes and the space; DO translate the heading text.
 - ¶n¶   page marker: keep exactly.
+- [p. n]   page marker in Markdown sources (e.g. [p. 51]): keep the brackets, the "p." and the digits EXACTLY. Never localize the "p." into the target language (not "[S. 51]", not "[page 51]"), never renumber it, and leave it at the same position inside the sentence.
 - <dnt>…</dnt>   do-not-translate: titles, sigla, foreign terms. Keep the <dnt> and </dnt> tags AND reproduce the text between them EXACTLY as in the source — same language, same spelling. Never translate, Germanize, or normalize it (e.g. leave "Chronicle of Uzès" as is; do NOT render it "Chronik von Uzès").
 - ‹…›   foreign-language quotation: keep the guillemets AND leave the enclosed text verbatim.
 - ⟦…⟧   editorial gloss (already in the target language): keep the brackets AND leave the enclosed text unchanged.
 - _…_   emphasis (italics, e.g. work titles): keep the UNDERSCORES exactly as they are and DO translate the enclosed text. Never convert them to asterisks (*…*), never drop them: the underscores carry the italics of the source document.
 - ⏎     hard line break: keep exactly.
-Also leave referenced work titles, proper names, and bibliographic references verbatim even when untagged — especially inside footnotes. When in doubt, do not translate: bibliographic precision outranks completeness.`;
+Also leave referenced work titles, proper names, and bibliographic references verbatim even when untagged — especially inside footnotes. When in doubt, do not translate: bibliographic precision outranks completeness.
+Output every paragraph exactly once, in the target language. Never emit the translation and then repeat the source wording as well (or the other way round) — duplicates have to be sorted out by hand afterwards. This applies to footnote texts just as much as to body paragraphs.
+HTML comments (<!-- … -->) are working notes, not book text: drop them entirely. Do not translate them and do not carry them over.`;
 
         function getTranslationPrompt(text) {
             const targetLang = document.getElementById('targetLang').value;
