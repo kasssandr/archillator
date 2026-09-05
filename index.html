@@ -259,7 +259,7 @@
                 </div>
                 <div class="w-64">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
-                    <input type="text" id="ollamaModel" placeholder="llama3.2, mistral, gemma3 …"
+                    <input type="text" id="ollamaModel" placeholder="qwen2.5:3b, translategemma:4b …"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
                     <p class="text-xs text-gray-500 mt-1">Any model installed via <code>ollama pull &lt;model&gt;</code></p>
                 </div>
@@ -1031,7 +1031,7 @@ ${text}`;
                 return content.trim();
 
             } else if (currentProvider === 'ollama') {
-                const model = ollamaModelInput.value.trim() || 'llama3.2';
+                const model = ollamaModelInput.value.trim() || 'qwen2.5:3b';
                 const baseUrl = apiKey || 'http://localhost:11434';
                 const response = await fetch(`${baseUrl}/v1/chat/completions`, {
                     method: 'POST',
@@ -2248,7 +2248,7 @@ ${text}`;
 
         // Ollama API functions (OpenAI-compatible local API)
         async function translateWithOllama(text, host) {
-            const model = ollamaModelInput.value.trim() || 'llama3.2';
+            const model = ollamaModelInput.value.trim() || 'qwen2.5:3b';
             const baseUrl = host || 'http://localhost:11434';
             const prompt = getTranslationPrompt(text);
 
@@ -2277,7 +2277,7 @@ ${text}`;
         }
 
         async function translateWithOllamaBatch(text, separator, host) {
-            const model = ollamaModelInput.value.trim() || 'llama3.2';
+            const model = ollamaModelInput.value.trim() || 'qwen2.5:3b';
             const baseUrl = host || 'http://localhost:11434';
             const prompt = getBatchTranslationPrompt(text, separator);
 

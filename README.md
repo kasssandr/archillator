@@ -268,7 +268,50 @@ ollama pull qwen2.5:3b
 ollama pull translategemma:4b
 ```
 
-### 3. Allow browser access (CORS) — one-time setup
+The VRAM column lists the weights only. A loaded model also needs room for its
+KV cache and compute buffers, which is what the next section is about.
+
+### 3. Cap the context window (important on small GPUs)
+
+Ollama loads a model with the context length its manifest declares. For
+`translategemma:4b` that is 131,072 tokens. Because the KV cache is sized from
+the context, a model listed at ~3 GB of weights can ask for more than 4 GB once
+it is loaded. If your card cannot supply that, Ollama does not fail: it moves
+the surplus layers into CPU RAM and translation slows down, with nothing in the
+UI to tell you why.
+
+Archillator translates paragraph by paragraph and never needs more than a few
+thousand tokens of context. Pin a smaller one with a Modelfile:
+
+```bash
+printf 'FROM translategemma:4b\nPARAMETER num_ctx 8192\n' > Modelfile
+ollama create translategemma:4b-8k -f Modelfile
+```
+
+Enter `translategemma:4b-8k` in the Model field. The variant shares its weights
+blob with the original, so it occupies no additional disk space.
+
+Two environment variables shrink the cache further and are worth setting once:
+
+```bash
+OLLAMA_FLASH_ATTENTION=1
+OLLAMA_KV_CACHE_TYPE=q8_0
+```
+
+To see what actually happened, run `ollama ps` while a translation is running:
+
+```
+NAME                  SIZE     PROCESSOR          CONTEXT
+translategemma:4b-8k  4.3 GB   84%/16% CPU/GPU    8192
+```
+
+`CONTEXT` confirms the cap took effect. It applies on the OpenAI-compatible
+endpoint that Archillator uses, not only on Ollama's native API. `PROCESSOR` is
+the number that decides your speed. A high CPU share like the one above means
+the model did not fit, so either free the GPU of whatever else is sitting on it
+or switch to a smaller model.
+
+### 4. Allow browser access (CORS) — one-time setup
 
 Browsers block requests to `localhost` from web pages by default. The solution is to set an environment variable that tells Ollama to allow this. **Do this once and you never have to think about it again.**
 
@@ -307,7 +350,7 @@ $env:OLLAMA_ORIGINS="*"; ollama serve
 
 > **Note:** If Ollama is already running in the background (auto-started at login), quit it first via the system tray before using the temporary method.
 
-### 4. Use in Archillator
+### 5. Use in Archillator
 
 1. Select **🦙 Ollama** in the provider tabs
 2. Leave the host as `http://localhost:11434` (default) or enter a custom host if running Ollama on another machine
