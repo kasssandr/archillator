@@ -417,7 +417,13 @@ it, the license invites forks.
 
 The interchange contract of the family — the *prepared document* — is specified
 in [PREPARED_FORMAT_SPEC](https://github.com/kasssandr/archilles-scriptor/blob/main/docs/PREPARED_FORMAT_SPEC.md);
-for Archillator its §7 (the `<dnt>` convention) is the binding part.
+for Archillator its §7 (the `<dnt>` convention) is the binding part. Since
+version 0.4.0 two more rules bind it. A heading's printed designator (letters,
+digits, roman numerals) is carried over unchanged, while a designator in
+words (`Erstes Kapitel`) is text and is translated; a Pandoc identifier `{#…}`
+on a heading, should one appear, passes through untouched (§4.4). A citation
+address survives translation in its invariant part — page, occurrence, note —
+while the wording belongs to the source (§4.7).
 
 For bug reports, feature requests, or contributions, please visit [archilles.org](https://archilles.org).
 
