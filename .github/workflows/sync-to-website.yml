@@ -41,6 +41,16 @@ jobs:
           mkdir -p website/archillator/js
           cp js/docx-bridge.js website/archillator/js/docx-bridge.js
 
+      # Nur die Website-Kopie bekommt den Stempel; im Quell-Repo steht "local".
+      # Faellt der Platzhalter weg, bricht der Lauf ab, statt still ohne Stempel zu deployen.
+      - name: Build-Stempel setzen
+        run: |
+          SHORT="${GITHUB_SHA::7}"
+          STAMP="<a href=\"https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}\" class=\"hover:underline\">${SHORT}</a> · $(date -u +%Y-%m-%d)"
+          sed -i "s|<span data-build>local</span>|<span data-build>${STAMP}</span>|" website/archillator/index.html
+          grep -q "data-build><a href=\"https://github.com/${GITHUB_REPOSITORY}/commit/${GITHUB_SHA}\"" website/archillator/index.html \
+            || { echo "Build-Platzhalter <span data-build>local</span> nicht gefunden"; exit 1; }
+
       - name: Commit and push
         run: |
           cd website

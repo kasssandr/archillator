@@ -13,6 +13,7 @@ const checks = [
   ["Regionsmarker [region: name] gebrieft", /\[region: name\]/, 1],
   ["YAML-Kopf gebrieft", /YAML metadata block/, 1],
   ["DNT-Tags vor dem Download entfernt", /function stripDnt\(/, 1],
+  ["Build-Platzhalter fuer den Sync-Stempel", /<span data-build>local<\/span>/, 1],
   ["Regel gegen doppelt ausgegebene Absaetze", /Output every paragraph exactly once/, 1],
   ["Regel gegen uebernommene HTML-Kommentare", /HTML comments \(<!-- … -->\) are working notes/, 1],
   ["docx-bridge eingebunden", /<script src="js\/docx-bridge\.js"><\/script>/, 1],
