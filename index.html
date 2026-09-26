@@ -187,8 +187,8 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
                     <select id="geminiModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="gemini-3.1-flash-lite">Gemini 3.1 Flash-Lite (fast, cheap)</option>
-                        <option value="gemini-3.5-flash">Gemini 3.5 Flash</option>
-                        <option value="gemini-3.1-pro">Gemini 3.1 Pro (best quality, paid only)</option>
+                        <option value="gemini-3.8-flash">Gemini 3.8 Flash (balanced)</option>
+                        <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview (best quality, paid only)</option>
                     </select>
                 </div>
             </div>
@@ -206,7 +206,7 @@
                     <select id="anthropicModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
                         <option value="claude-haiku-4-5">Claude Haiku 4.5 (fast, cheap)</option>
                         <option value="claude-sonnet-5">Claude Sonnet 5 (balanced)</option>
-                        <option value="claude-opus-4-8">Claude Opus 4.8 (best quality)</option>
+                        <option value="claude-opus-5-5">Claude Opus 5.5 (best quality)</option>
                     </select>
                 </div>
             </div>
@@ -222,9 +222,9 @@
                 <div class="w-64">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Model</label>
                     <select id="openaiModel" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500">
-                        <option value="gpt-5.6-luna">GPT-5.6 Luna (fast, cheap)</option>
-                        <option value="gpt-5.6-terra">GPT-5.6 Terra (balanced)</option>
-                        <option value="gpt-5.6-sol">GPT-5.6 Sol (best quality)</option>
+                        <option value="gpt-6-luna">GPT-6 Luna (fast, cheap)</option>
+                        <option value="gpt-6-sol">GPT-6 Sol (balanced)</option>
+                        <option value="gpt-6-astra">GPT-6 Astra (best quality)</option>
                     </select>
                 </div>
             </div>
@@ -244,7 +244,7 @@
                         <option value="openrouter/free">Auto — best available free model</option>
                         <option value="nvidia/nemotron-3-super-120b-a12b:free">Nemotron 3 Super 120B (free)</option>
                         <option value="google/gemma-4-31b-it:free">Gemma 4 31B (free)</option>
-                        <option value="google/gemini-3.5-flash">Gemini 3.5 Flash (paid)</option>
+                        <option value="google/gemini-3.8-flash">Gemini 3.8 Flash (paid)</option>
                     </select>
                 </div>
             </div>
@@ -539,15 +539,15 @@ Works great for:
             <h3 class="font-medium text-amber-800 mb-2">Cost comparison (approx. per 100,000 characters)</h3>
             <p class="text-sm text-amber-700">
                 <strong>Ollama (local):</strong> Free •
+                <strong>GPT-6 Luna:</strong> ~$0.02 •
                 <strong>Gemini 3.1 Flash-Lite:</strong> ~$0.04 •
+                <strong>Gemini 3.8 Flash:</strong> ~$0.11 •
                 <strong>Claude Haiku 4.5:</strong> ~$0.15 •
-                <strong>GPT-5.6 Luna:</strong> ~$0.18 •
-                <strong>Gemini 3.5 Flash:</strong> ~$0.26 •
-                <strong>Gemini 3.1 Pro:</strong> ~$0.35 •
-                <strong>GPT-5.6 Terra:</strong> ~$0.44 •
-                <strong>Claude Sonnet 5:</strong> ~$0.45 •
-                <strong>Claude Opus 4.8:</strong> ~$0.75 •
-                <strong>GPT-5.6 Sol:</strong> ~$0.88
+                <strong>GPT-6 Sol:</strong> ~$0.30 •
+                <strong>Claude Sonnet 5:</strong> ~$0.30 •
+                <strong>Gemini 3.1 Pro Preview:</strong> ~$0.35 •
+                <strong>Claude Opus 5.5:</strong> ~$0.60 •
+                <strong>GPT-6 Astra:</strong> ~$1.50
             </p>
         </div>
 
@@ -1301,16 +1301,16 @@ ${text}`;
             const costs = {
                 // Gemini
                 'gemini-3.1-flash-lite': 0.22,
-                'gemini-3.5-flash': 1.31,
-                'gemini-3.1-pro': 1.75,
+                'gemini-3.8-flash': 0.56,
+                'gemini-3.1-pro-preview': 1.75,
                 // OpenAI
-                'gpt-5.6-luna': 0.88,
-                'gpt-5.6-terra': 2.19,
-                'gpt-5.6-sol': 4.38,
+                'gpt-6-luna': 0.08,
+                'gpt-6-sol': 1.50,
+                'gpt-6-astra': 7.50,
                 // Claude
                 'claude-haiku-4-5': 0.75,
-                'claude-sonnet-5': 2.25,
-                'claude-opus-4-8': 3.75
+                'claude-sonnet-5': 1.50,
+                'claude-opus-5-5': 3.00
             };
 
             const costPer1M = costs[model] || 0.50;
@@ -1743,12 +1743,20 @@ ${text}`;
         }
 
         // ==================== DOWNLOAD ====================
+        // <dnt>…</dnt> schuetzt Titel und Belege nur waehrend der Uebersetzung
+        // (Scriptor translate-prep). Im Arbeitsstand bleiben die Tags sichtbar,
+        // damit man pruefen kann, was geschuetzt war; die Ausgabedatei ist frei davon.
+        function stripDnt(text) {
+            return text === null ? null : text.replace(/<\/?dnt>/g, '');
+        }
+
         async function downloadTranslation() {
             const baseName = currentFileName.replace(/\.[^.]+$/, '');
             const targetLang = document.getElementById('targetLang').value;
-            
+            const translations = translatedParagraphs.map(stripDnt);
+
             // Filter out null entries and prepare paragraphs
-            const paragraphs = translatedParagraphs.filter(p => p !== null);
+            const paragraphs = translations.filter(p => p !== null);
             
             if (currentFileType === 'txt') {
                 // TXT input → TXT output
@@ -1763,7 +1771,7 @@ ${text}`;
                 // DOCX input → DOCX output. Bewusst translatedParagraphs statt paragraphs:
                 // Das Array muss parallel zu docxItems bleiben (null = nicht uebersetzt).
                 // Herausgefilterte Nulls wuerden die Zuordnung verschieben.
-                await downloadAsDocx(translatedParagraphs, baseName, targetLang);
+                await downloadAsDocx(translations, baseName, targetLang);
             }
         }
         
@@ -1789,7 +1797,7 @@ ${text}`;
                 }
                 nodesByFile[node.filePath].push({
                     ...node,
-                    translatedText: translatedParagraphs[index] || node.originalText
+                    translatedText: stripDnt(translatedParagraphs[index]) || node.originalText
                 });
             });
             
@@ -1989,6 +1997,8 @@ ${text}`;
 - ⟦…⟧   editorial gloss (already in the target language): keep the brackets AND leave the enclosed text unchanged.
 - _…_   emphasis (italics, e.g. work titles): keep the UNDERSCORES exactly as they are and DO translate the enclosed text. Never convert them to asterisks (*…*), never drop them: the underscores carry the italics of the source document.
 - ⏎     hard line break: keep exactly.
+- [region: name]   region marker in Markdown sources (e.g. [region: front-matter], [region: bibliography]): a fixed token of the format. Keep it EXACTLY, on its own line — never translate the region name, even where you translate the heading beneath it.
+- --- … ---   a YAML metadata block at the very start of a Markdown source: leave it completely untouched.
 Also leave referenced work titles, proper names, and bibliographic references verbatim even when untagged — especially inside footnotes. When in doubt, do not translate: bibliographic precision outranks completeness.
 Output every paragraph exactly once, in the target language. Never emit the translation and then repeat the source wording as well (or the other way round) — duplicates have to be sorted out by hand afterwards. This applies to footnote texts just as much as to body paragraphs.
 HTML comments (<!-- … -->) are working notes, not book text: drop them entirely. Do not translate them and do not carry them over.`;
@@ -2307,9 +2317,13 @@ ${text}`;
 
         // Anthropic/Claude API functions
 
-        // Sonnet 5 and Opus 4.8 run adaptive thinking unless it is switched off,
-        // which puts a thinking block ahead of the answer and spends max_tokens on it.
-        const ANTHROPIC_THINKING_MODELS = ['claude-sonnet-5', 'claude-opus-4-8'];
+        // Sonnet 5 runs adaptive thinking unless it is switched off, which puts a
+        // thinking block ahead of the answer and spends max_tokens on it.
+        const ANTHROPIC_THINKING_MODELS = ['claude-sonnet-5'];
+        // Opus 5.5 cannot switch thinking off (400 on `disabled`): the lowest effort
+        // keeps it short, and the output budget gets headroom for it.
+        const ANTHROPIC_ALWAYS_THINKING_MODELS = ['claude-opus-5-5'];
+        const THINKING_HEADROOM = 8192;
 
         function anthropicBody(model, prompt, maxTokens) {
             const body = {
@@ -2319,13 +2333,25 @@ ${text}`;
             };
             if (ANTHROPIC_THINKING_MODELS.includes(model)) {
                 body.thinking = { type: 'disabled' };
+            } else if (ANTHROPIC_ALWAYS_THINKING_MODELS.includes(model)) {
+                body.max_tokens = maxTokens + THINKING_HEADROOM;
+                body.output_config = { effort: 'low' };
             }
             return body;
         }
 
         function anthropicText(data) {
+            // "blocked" routes the caller into its content-filter path (paragraph by
+            // paragraph, keeping the original where Claude still declines).
+            if (data.stop_reason === 'refusal') {
+                throw new Error('Claude blocked this passage (refusal).');
+            }
             const block = data.content?.find(b => b.type === 'text');
-            if (!block) throw new Error('Empty response from Claude');
+            if (!block) {
+                throw new Error(data.stop_reason === 'max_tokens'
+                    ? 'Claude ran out of output budget before producing any text. Translate a shorter passage.'
+                    : 'Empty response from Claude');
+            }
             return block.text;
         }
 
