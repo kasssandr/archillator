@@ -1439,12 +1439,19 @@ ${text}`;
                     
                     const translated = await withRetry(
                         () => translateTextBatch(combinedText, SEPARATOR, apiKey), `Batch ${batchCount}`);
-                    const translatedParts = translated.split(/===PARAGRAPH_BREAK===/i).map(s => s.trim());
-                    
+                    // Modelle verstuemmeln die Marke gelegentlich (===PARAGRAPH_BREAK==).
+                    const translatedParts = translated.split(/={2,}\s*PARAGRAPH_?BREAK\s*={2,}/i).map(s => s.trim());
+
+                    // Stimmt die Zahl nicht, liesse sich nichts mehr sicher zuordnen: lieber einzeln
+                    // nachuebersetzen als Absaetze still im Original stehen zu lassen.
+                    if (translatedParts.length !== batch.length || translatedParts.some(p => !p)) {
+                        throw new Error(`Paragraph count mismatch (${translatedParts.length} returned, ${batch.length} sent)`);
+                    }
+
                     // Map back to original indices
                     for (let j = 0; j < batch.length; j++) {
                         const originalIndex = batch[j].index;
-                        translatedParagraphs[originalIndex] = translatedParts[j] || batch[j].text;
+                        translatedParagraphs[originalIndex] = dropInventedNoteDefs(batch[j].text, translatedParts[j]);
                     }
                     
                     logChunk(`✓ Batch ${batchCount} done (${batch.length} paragraphs)`);
@@ -1469,7 +1476,7 @@ ${text}`;
                             await sleep(1000);
                             const translated = await withRetry(
                                 () => translateText(item.text, apiKey), `Paragraph ${item.index + 1}`);
-                            translatedParagraphs[item.index] = translated;
+                            translatedParagraphs[item.index] = dropInventedNoteDefs(item.text, translated);
                             logChunk(`  ✓ Paragraph ${item.index + 1} done`);
                         } catch (retryError) {
                             const errMsg = retryError.message || 'Unknown error';
@@ -1992,10 +1999,10 @@ ${text}`;
         const ARCHILLES_BRIEFING = `Preserve the following markers EXACTLY, character for character, keeping them in place. Never translate, reorder, normalize, add, or remove them:
 - ^n^   footnote reference (e.g. ^12^): keep the carets and the digits.
 - [^n]   footnote reference in Markdown sources (e.g. [^12]): keep brackets, caret and digits, and leave it attached to the same word.
-- [^n]: …   footnote definition (a line starting with the marker): keep the marker and the colon EXACTLY; DO translate the footnote text that follows it. Never merge such a line into a neighbouring paragraph.
+- [^n]: …   footnote definition (a line starting with the marker): keep the marker and the colon EXACTLY; DO translate the footnote text that follows it. Never merge such a line into a neighbouring paragraph. Never ADD a definition that is not in the source: a paragraph that only carries the reference [^n] stays without one — the note text lives elsewhere in the document.
 - #, ##   Markdown heading marks: keep the leading hashes and the space; DO translate the heading text.
 - ¶n¶   page marker: keep exactly.
-- [p. n]   page marker in Markdown sources (e.g. [p. 51]): keep the brackets, the "p." and the digits EXACTLY. Never localize the "p." into the target language (not "[S. 51]", not "[page 51]"), never renumber it, and leave it at the same position inside the sentence.
+- [p. n]   page marker in Markdown sources (e.g. [p. 51]): keep the brackets, the "p." and the digits EXACTLY. Never localize the "p." into the target language (not "[S. 51]", not "[page 51]"), never renumber it, and leave it at the same position inside the sentence. A plain page reference in the running text (e.g. "see p. 30", "pp. 84, 91") is NOT a marker: translate it normally and never put it in brackets.
 - <dnt>…</dnt>   do-not-translate: titles, sigla, foreign terms. Keep the <dnt> and </dnt> tags AND reproduce the text between them EXACTLY as in the source — same language, same spelling. Never translate, Germanize, or normalize it (e.g. leave "Chronicle of Uzès" as is; do NOT render it "Chronik von Uzès").
 - ‹…›   foreign-language quotation: keep the guillemets AND leave the enclosed text verbatim.
 - ⟦…⟧   editorial gloss (already in the target language): keep the brackets AND leave the enclosed text unchanged.
@@ -2569,6 +2576,20 @@ ${text}`;
         // als [ERROR] mit Original stehen zu lassen. Inhaltsfilter u. a. fallen sofort durch.
         const TRANSIENT_ERROR = /high demand|overloaded|unavailable|try again later|rate.?limit|resource.*exhausted|quota|too many requests|\b(429|500|502|503|504)\b|failed to fetch|networkerror|timed? ?out/i;
         const RETRY_DELAYS_S = [10, 30, 60, 120, 240, 300];
+
+        // Bei gesammelten Endnoten steht im Absatz nur der Verweis [^n]; Modelle dichten dann
+        // gern eine Definition "[^n]: ..." dazu. Erlaubt ist nur, was die Quelle selbst definiert.
+        function dropInventedNoteDefs(source, translated) {
+            const own = new Set((source.match(/^\[\^\d+\]:/gm) || []));
+            return translated
+                .split('\n')
+                .filter(line => {
+                    const def = line.match(/^\s*(\[\^\d+\]:)/);
+                    return !def || own.has(def[1]);
+                })
+                .join('\n')
+                .trim();
+        }
 
         async function withRetry(fn, label) {
             for (let attempt = 0; ; attempt++) {
