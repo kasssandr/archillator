@@ -1437,7 +1437,8 @@ ${text}`;
                     const SEPARATOR = '\n\n===PARAGRAPH_BREAK===\n\n';
                     const combinedText = batch.map(b => b.text).join(SEPARATOR);
                     
-                    const translated = await translateTextBatch(combinedText, SEPARATOR, apiKey);
+                    const translated = await withRetry(
+                        () => translateTextBatch(combinedText, SEPARATOR, apiKey), `Batch ${batchCount}`);
                     const translatedParts = translated.split(/===PARAGRAPH_BREAK===/i).map(s => s.trim());
                     
                     // Map back to original indices
@@ -1466,7 +1467,8 @@ ${text}`;
                         if (shouldStop) break;
                         try {
                             await sleep(1000);
-                            const translated = await translateText(item.text, apiKey);
+                            const translated = await withRetry(
+                                () => translateText(item.text, apiKey), `Paragraph ${item.index + 1}`);
                             translatedParagraphs[item.index] = translated;
                             logChunk(`  ✓ Paragraph ${item.index + 1} done`);
                         } catch (retryError) {
@@ -2561,6 +2563,26 @@ ${text}`;
         // ==================== UTILITIES ====================
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // Ueberlast, Ratenlimit und Netzaussetzer gehen vorbei: warten statt den Absatz
+        // als [ERROR] mit Original stehen zu lassen. Inhaltsfilter u. a. fallen sofort durch.
+        const TRANSIENT_ERROR = /high demand|overloaded|unavailable|try again later|rate.?limit|resource.*exhausted|quota|too many requests|\b(429|500|502|503|504)\b|failed to fetch|networkerror|timed? ?out/i;
+        const RETRY_DELAYS_S = [10, 30, 60, 120, 240, 300];
+
+        async function withRetry(fn, label) {
+            for (let attempt = 0; ; attempt++) {
+                try {
+                    return await fn();
+                } catch (error) {
+                    const msg = error.message || '';
+                    if (!TRANSIENT_ERROR.test(msg) || attempt >= RETRY_DELAYS_S.length || shouldStop) throw error;
+                    const wait = RETRY_DELAYS_S[attempt];
+                    logChunk(`⏳ ${label}: ${msg.substring(0, 60)} – warte ${wait} s (Versuch ${attempt + 2}/${RETRY_DELAYS_S.length + 1})`);
+                    for (let s = 0; s < wait && !shouldStop; s++) await sleep(1000);
+                    if (shouldStop) throw error;
+                }
+            }
         }
     </script>
 </body>
