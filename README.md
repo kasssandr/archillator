@@ -54,7 +54,7 @@ Run open-source models entirely on your own machine — no API key, no costs, no
 One key, many models — including a rotating selection of free ones.
 
 - **Auto — best available free model** (`openrouter/free`) – Lets OpenRouter pick from whatever is currently free. Survives the constant churn in the free line-up.
-- **Nemotron 3 Super 120B** (free) and **Gemma 4 31B** (free)
+- **Nemotron 3 Ultra 550B** (free) and **Gemma 4 31B** (free)
 - **Gemini 3.8 Flash** (paid) – if you want quality through the same key
 
 **Caveat worth knowing:** free models are rate-limited (roughly 20 requests per minute) and many of them are *reasoning* models. On a long passage such a model can spend its entire output budget on internal thinking and return nothing at all. Archillator reports this clearly instead of crashing — the fix is to translate a shorter passage or switch models.
@@ -62,21 +62,22 @@ One key, many models — including a rotating selection of free ones.
 ### Google Gemini
 - **Gemini 3.1 Flash-Lite** – Fast and cheap, recommended default (~$0.04 per 100k chars)
 - **Gemini 3.8 Flash** – Stronger, Google's recommended Flash model (~$0.11 per 100k chars; promotional price through 2026, doubles on 1 January 2027)
-- **Gemini 3.1 Pro Preview** – Best quality from Google (~$0.35 per 100k chars)
+- **Gemini 4 Argon** – Google's flagship, best quality (~$0.30 per 100k chars)
 
-**Free tier:** since April 2026, only Flash and Flash-Lite still have a free tier — **Pro models are paid-only.**
+**Free tier:** since April 2026, only Flash and Flash-Lite still have a free tier — **Pro models and Gemini 4 Argon are paid-only.**
 **Note:** Gemini's free tier may use your data for model training. For sensitive content, use the paid tier or another provider.
 
 ### OpenAI
 - **GPT-6 Luna** – Fast and very cheap (~$0.02 per 100k chars)
-- **GPT-6 Sol** – Balanced (~$0.30 per 100k chars)
+- **GPT-6.1 Terra** – Balanced, OpenAI pitches it for natural writing (~$0.15 per 100k chars)
+- **GPT-6.1 Sol** – Strong, close to Astra (~$0.30 per 100k chars)
 - **GPT-6 Astra** – Current flagship, best quality (~$1.50 per 100k chars)
 
 **Note:** OpenAI has no free tier — an OpenAI key without credit on the account returns "You exceeded your current quota" on every request.
 
 ### Anthropic Claude
-- **Claude Haiku 4.5** – Fast and affordable (~$0.15 per 100k chars)
-- **Claude Sonnet 5** – Balanced quality and cost (recommended, ~$0.30 per 100k chars)
+- **Claude Haiku 5.5** – Fast and very cheap (~$0.02 per 100k chars)
+- **Claude Sonnet 5.5** – Balanced quality and cost (recommended, ~$0.30 per 100k chars)
 - **Claude Opus 5.5** – Highest quality (~$0.60 per 100k chars; always thinks a little first, run at the lowest effort)
 
 ## When to Use Which Provider
@@ -86,7 +87,7 @@ One key, many models — including a rotating selection of free ones.
 | Zero cost, full privacy | Ollama (local) |
 | Zero cost, no local GPU | OpenRouter (free models) |
 | Large documents, cost-sensitive | Gemini 3.1 Flash-Lite |
-| Sensitive topics (gender, sexuality, politics) | Claude Sonnet 5 |
+| Sensitive topics (gender, sexuality, politics) | Claude Sonnet 5.5 |
 | Best overall quality | Claude Opus 5.5 or GPT-6 Astra |
 | Fastest processing | Gemini 3.1 Flash-Lite |
 
@@ -188,26 +189,27 @@ For spelling and grammar correction without style changes – a DeepL Write alte
 
 ## Cost Estimates
 
-Approximate costs per 100,000 characters (input + output). Derived from the providers' token prices as of September 2026 — treat them as a rough order of magnitude, not a quote.
+Approximate costs per 100,000 characters (input + output). Derived from the providers' token prices as of November 2026 — treat them as a rough order of magnitude, not a quote.
 
 | Model | Cost |
 |-------|------|
 | Ollama (local) | **Free** |
 | OpenRouter free models | **Free** (rate-limited) |
 | GPT-6 Luna | ~$0.02 |
+| Claude Haiku 5.5 | ~$0.02 |
 | Gemini 3.1 Flash-Lite | ~$0.04 |
 | Gemini 3.8 Flash | ~$0.11 |
-| Claude Haiku 4.5 | ~$0.15 |
-| GPT-6 Sol | ~$0.30 |
-| Claude Sonnet 5 | ~$0.30 |
-| Gemini 3.1 Pro Preview | ~$0.35 |
+| GPT-6.1 Terra | ~$0.15 |
+| GPT-6.1 Sol | ~$0.30 |
+| Claude Sonnet 5.5 | ~$0.30 |
+| Gemini 4 Argon | ~$0.30 |
 | Claude Opus 5.5 | ~$0.60 |
 | GPT-6 Astra | ~$1.50 |
 
 A typical 300-page book (~500,000 characters) costs approximately:
 - Free with Ollama (local) or OpenRouter's free models
 - $0.20 with Gemini 3.1 Flash-Lite
-- $1.50 with Claude Sonnet 5
+- $1.50 with Claude Sonnet 5.5
 - $3.00 with Claude Opus 5.5
 
 ## API Keys
