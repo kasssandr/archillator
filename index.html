@@ -972,6 +972,14 @@ ${text}`;
                 /temperature|max_tokens|max_completion_tokens/.test(message);
         }
 
+        // An account without credit gets the same text as Gemini's per-minute limit
+        // ("You exceeded your current quota"); only the code tells them apart, so it
+        // goes into the message for withRetry to see.
+        function openaiError(status, error) {
+            const message = error.error?.message || `API Error: ${status}`;
+            return new Error(error.error?.code === 'insufficient_quota' ? `${message} (insufficient_quota)` : message);
+        }
+
         async function callOpenAI(apiKey, model, messages, maxTokens, temperature) {
             const send = (newParams) => fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
@@ -990,13 +998,13 @@ ${text}`;
                     openaiNeedsNewParams[model] = true;
                     response = await send(true);
                 } else {
-                    throw new Error(error.error?.message || `API Error: ${response.status}`);
+                    throw openaiError(response.status, error);
                 }
             }
 
             if (!response.ok) {
                 const error = await response.json().catch(() => ({}));
-                throw new Error(error.error?.message || `API Error: ${response.status}`);
+                throw openaiError(response.status, error);
             }
 
             const data = await response.json();
@@ -2586,6 +2594,10 @@ ${text}`;
         // als [ERROR] mit Original stehen zu lassen. Inhaltsfilter u. a. fallen sofort durch.
         const TRANSIENT_ERROR = /high demand|overloaded|unavailable|try again later|rate.?limit|resource.*exhausted|quota|too many requests|\b(429|500|502|503|504)\b|failed to fetch|networkerror|timed? ?out/i;
         const RETRY_DELAYS_S = [10, 30, 60, 120, 240, 300];
+        // Limits that waiting a few minutes cannot lift: no free tier for the model
+        // ("limit: 0"), a daily cap, or an account without credit. These end the run
+        // at once instead of retrying for twelve minutes.
+        const PERMANENT_ERROR = /limit: 0\b|per.?day|retry in \d+h|credit balance|no credits|insufficient.?(quota|credits)/i;
 
         // Bei gesammelten Endnoten steht im Absatz nur der Verweis [^n]; Modelle dichten dann
         // gern eine Definition "[^n]: ..." dazu. Erlaubt ist nur, was die Quelle selbst definiert.
@@ -2607,7 +2619,8 @@ ${text}`;
                     return await fn();
                 } catch (error) {
                     const msg = error.message || '';
-                    if (!TRANSIENT_ERROR.test(msg) || attempt >= RETRY_DELAYS_S.length || shouldStop) throw error;
+                    if (PERMANENT_ERROR.test(msg) || !TRANSIENT_ERROR.test(msg) ||
+                        attempt >= RETRY_DELAYS_S.length || shouldStop) throw error;
                     const wait = RETRY_DELAYS_S[attempt];
                     logChunk(`⏳ ${label}: ${msg.substring(0, 60)} – warte ${wait} s (Versuch ${attempt + 2}/${RETRY_DELAYS_S.length + 1})`);
                     for (let s = 0; s < wait && !shouldStop; s++) await sleep(1000);
