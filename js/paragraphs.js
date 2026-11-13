@@ -32,6 +32,11 @@
   // einem Absatz ("Dazu können wir in den Elementi lesen:", Meisel).
   const SENT_END = /[.:!?»“”"’']$/;
   const TRAILING_MARKERS = /(\s*\[\d{1,4}\])+$/;
+  // Anmerkungsziffer, die die Kopie aus der Hochstellung holt: "Belgian Rome.”2",
+  // "disintegrated.4". Nur hinter einem Satzzeichen, damit "in 455" bleibt.
+  const TRAILING_NOTE_NUMBER = /([.!?»“”"’'])\d{1,3}$/;
+  // Endet eine Zeile so, schließt sie keine Überschrift ab.
+  const OPEN_END = /[.,;:!?»“”"’'\-–—(]$/;
   const BULLET_RE = /^[•▪◦‣]\s*\S/;
   const KEEP_HYPHEN_BEFORE = /^(und|oder|bis|sowie|wie|als|zur?|zum?|noch|aber)\b/i;
   // Trennstrich: Buchstabe + "-" am Zeilenende (Scriptor: stripped[-2].isalpha()).
@@ -54,6 +59,8 @@
   // Wer mehr als so viele Gipfelbreiten über der Satzbreite liegt, ist aus
   // mehreren Druckzeilen geklebt.
   const MERGED_LINE = 2;
+  // Längste Überschrift ohne Versalien, als Anteil der Satzbreite.
+  const HEADING_MAX = 0.65;
 
   function leadingWidth(line) {
     let w = 0;
@@ -195,8 +202,17 @@
         end();
         continue;
       }
+      const next = lines[i + 1] ? lines[i + 1].trim() : "";
 
-      if (cal && !pendingHyphen && line.length <= cal.threshold && capsLine(line)) {
+      // Eine kurze Zeile ohne Satzzeichen am Ende, ganz in Versalien oder am
+      // Anfang eines Absatzes vor einer groß beginnenden Zeile, ist eine
+      // Überschrift ("Too Much History, Not Enough History"). Ein Absatz beginnt
+      // nie mit einer kurzen Zeile, außer er ist selbst nur eine Zeile lang.
+      // Deutlich kurz, weil im Deutschen jedes Substantiv groß beginnt und die
+      // erste Zeile eines Absatzes knapp unter der Schwelle bleiben kann.
+      const heading = !cur && cal && line.length <= HEADING_MAX * cal.width
+        && !OPEN_END.test(line) && /^\p{Lu}/u.test(next);
+      if (cal && !pendingHyphen && line.length <= cal.threshold && (capsLine(line) || heading)) {
         end();
         cur = line;
         end();
@@ -216,7 +232,6 @@
       }
 
       let ends = LINE_HYPHEN.test(line);
-      const next = lines[i + 1] ? lines[i + 1].trim() : "";
       if (ends && next && KEEP_HYPHEN_BEFORE.test(next)) ends = false;
       const piece = ends ? line.slice(0, -1) : line;
 
@@ -225,7 +240,7 @@
 
       // Ein Absatz beginnt nicht klein: "«la caduta »" / "e che è, piuttosto".
       if (!ends && cal && !LOWER_START.test(next)) {
-        const bare = line.replace(TRAILING_MARKERS, "");
+        const bare = line.replace(TRAILING_MARKERS, "").replace(TRAILING_NOTE_NUMBER, "$1");
         if (SENT_END.test(bare) && shortTail(bare.length, cal)) end();
       }
     }

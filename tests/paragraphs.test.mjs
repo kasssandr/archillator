@@ -140,6 +140,27 @@ test("Kurze Versalzeile steht für sich", () => {
   assert.deepEqual(splitParagraphs(text), ["VORWORT", ...PARAS, "SANTO MAZZARINO"]);
 });
 
+test("Anmerkungsziffer hinter dem Satzzeichen verdeckt das Satzende nicht", () => {
+  // Acrobat holt die hochgestellte Ziffer auf die Zeile: "Belgian Rome.”2".
+  const lines = PARAS.flatMap((p) => wrap(p, 68));
+  const i = wrap(PARAS[0], 68).length - 1;
+  lines[i] = lines[i] + "2";
+  const out = splitParagraphs(lines.join("\n"));
+  assert.equal(out.length, PARAS.length);
+  assert.ok(out[0].endsWith("rückte.2"));
+});
+
+test("Jahreszahl am Zeilenende ist keine Anmerkungsziffer", () => {
+  const lines = PARAS.flatMap((p) => wrap(p, 68));
+  const text = [...lines, "Die Stadt wurde geplündert im Jahre 410", "und danach wieder aufgebaut."].join("\n");
+  assert.ok(splitParagraphs(text).at(-1).endsWith("Jahre 410 und danach wieder aufgebaut."));
+});
+
+test("Kurze Zeile ohne Satzzeichen am Absatzanfang ist eine Überschrift", () => {
+  const text = [...PARAS.flatMap((p) => wrap(p, 68)), "Zu viel Geschichte", ...wrap(PARAS[0], 68)].join("\n");
+  assert.deepEqual(splitParagraphs(text), [...PARAS, "Zu viel Geschichte", PARAS[0]]);
+});
+
 test("Aufzählungszeichen öffnet einen Absatz", () => {
   const text = [...PARAS.flatMap((p) => wrap(p, 68)), "Es gibt zwei Fälle, die man unterscheiden muss, und zwar", "• den ersten Fall", "• den zweiten Fall"].join("\n");
   assert.deepEqual(splitParagraphs(text).slice(-3), [
