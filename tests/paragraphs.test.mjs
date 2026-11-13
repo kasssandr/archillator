@@ -94,6 +94,29 @@ test("Kurze Zeile auf Doppelpunkt trennt die Einleitung vom Zitat", () => {
   ]);
 });
 
+test("Zusammengeklebte Druckzeilen: kurzer Schluss am Ende einer überlangen Zeile", () => {
+  // Der PDF-Viewer hat zwei Druckzeilen an einer Trennung verbunden (wie bei
+  // Mazzarino: "tradiziona-" + "lista"); der kurze Schluss hängt hinten dran.
+  // Grenze: Ist der Schluss nur ein Wort, bleibt die geklebte Zeile im Bereich
+  // normaler voller Zeilen und ist von ihnen nicht zu unterscheiden.
+  const a = "Dieser Absatz endet auf einer zusammengeklebten Zeile, die aus einer vollen Druckzeile und dem kurzen Rest besteht.";
+  const b = "Danach beginnt ein neuer Absatz, der wieder ganz normal umbrochen ist.";
+  const text = [...PARAS.flatMap((p) => wrap(p, 68)), a, b].join("\n");
+  assert.deepEqual(splitParagraphs(text).slice(-2), [a, b]);
+});
+
+test("Überlange Zeile, deren Rest fast voll ist, beendet keinen Absatz", () => {
+  const lines = PARAS.flatMap((p) => wrap(p, 68));
+  const full = "Diese Zeile ist voll, und auch die angeklebte zweite Zeile ist fast so";
+  const text = [...lines, `${full} lang wie eine ganze Druckzeile, endet aber auf »Punkt.«`, "und läuft weiter."].join("\n");
+  assert.ok(splitParagraphs(text).at(-1).endsWith("»Punkt.« und läuft weiter."));
+});
+
+test("Kurze Versalzeile steht für sich", () => {
+  const text = ["VORWORT", ...PARAS.flatMap((p) => wrap(p, 68)), "SANTO MAZZARINO"].join("\n");
+  assert.deepEqual(splitParagraphs(text), ["VORWORT", ...PARAS, "SANTO MAZZARINO"]);
+});
+
 test("Aufzählungszeichen öffnet einen Absatz", () => {
   const text = [...PARAS.flatMap((p) => wrap(p, 68)), "Es gibt zwei Fälle, die man unterscheiden muss, und zwar", "• den ersten Fall", "• den zweiten Fall"].join("\n");
   assert.deepEqual(splitParagraphs(text).slice(-3), [

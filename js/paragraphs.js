@@ -49,6 +49,9 @@
   // Länger setzt kein Buch eine Zeile. Liegt der Median darüber, ist der Text
   // schon umbrochen (Word, Webseite): jede Zeile ist ein Absatz.
   const MAX_PRINTED_LINE = 160;
+  // Wer mehr als so viele Gipfelbreiten über der Satzbreite liegt, ist aus
+  // mehreren Druckzeilen geklebt.
+  const MERGED_LINE = 2;
 
   function leadingWidth(line) {
     let w = 0;
@@ -71,6 +74,12 @@
    * zu wenige Zeilen hat, um einen Gipfel zu zeigen.
    */
   function calibrateThreshold(lengths) {
+    const c = calibrate(lengths);
+    return c ? c.threshold : null;
+  }
+
+  /** { threshold, width } — width ist die volle Satzbreite (Gipfel), oder null. */
+  function calibrate(lengths) {
     if (lengths.length < MIN_CALIB_LINES) return null;
     const max = Math.max(...lengths);
     const raw = new Array(max + 2).fill(0);
@@ -90,9 +99,33 @@
     }
     const cutoff = smooth[mode] * PEAK_FRACTION;
     for (let n = mode; n > 0; n--) {
-      if (smooth[n] < cutoff) return n;
+      if (smooth[n] < cutoff) return { threshold: n, width: mode };
     }
     return null;
+  }
+
+  /**
+   * Manche PDF-Viewer kleben beim Kopieren Druckzeilen zusammen, meist an einer
+   * Trennung ("tradiziona-" + "lista"). Die kurze Schlusszeile eines Absatzes
+   * steckt dann am Ende einer überlangen Zeile. Ihre Länge wird geschätzt:
+   * Gesamtlänge minus die vollen Zeilen davor. Jede abgezogene Zeile streut um
+   * eine Gipfelbreite, also wird die Schwelle um ebenso viel strenger.
+   */
+  function shortTail(len, cal) {
+    const spread = cal.width - cal.threshold;
+    // Eine einzelne Druckzeile reicht so weit über den Gipfel hinaus wie unter ihn.
+    if (len <= cal.width + MERGED_LINE * spread) return len <= cal.threshold;
+    const before = Math.ceil(len / cal.width) - 1;
+    const tail = len - before * cal.width;
+    return tail <= cal.threshold - before * spread;
+  }
+
+  // Eine kurze Zeile ganz in Versalien, ohne Satzzeichen am Ende, ist eine
+  // Überschrift oder Unterschrift ("PREFAZIONE", "SANTO MAZZARINO") und steht
+  // für sich. Mit Satzzeichen könnte sie der Schluss eines Absatzes sein ("(UNO).").
+  function capsLine(line) {
+    return /\p{Lu}.*\p{Lu}/u.test(line) && !/\p{Ll}/u.test(line)
+      && !/[.,;:!?»“”"’'-]$/.test(line);
   }
 
   /** Text → Liste von Absätzen (Zeilen schon zusammengefügt, Trennungen aufgelöst). */
@@ -112,7 +145,7 @@
         calib.push(lines[i].trim().length);
       }
     }
-    const threshold = detect ? calibrateThreshold(calib) : null;
+    const cal = detect ? calibrate(calib) : null;
 
     // Linker Rand: der häufigste Einzug, wenn genug Zeilen darauf stehen.
     const indents = lines.map((l) => (l.trim() ? leadingWidth(l) : null));
@@ -155,6 +188,13 @@
         continue;
       }
 
+      if (cal && !pendingHyphen && line.length <= cal.threshold && capsLine(line)) {
+        end();
+        cur = line;
+        end();
+        continue;
+      }
+
       if (cur && !pendingHyphen) {
         // Aufzählungszeichen öffnet einen Absatz.
         if (detect && BULLET_RE.test(line)) end();
@@ -175,9 +215,9 @@
       cur = pendingHyphen ? cur + piece : (cur ? cur + " " + piece : piece);
       pendingHyphen = ends;
 
-      if (!ends && threshold !== null) {
+      if (!ends && cal) {
         const bare = line.replace(TRAILING_MARKERS, "");
-        if (bare.length <= threshold && SENT_END.test(bare)) end();
+        if (SENT_END.test(bare) && shortTail(bare.length, cal)) end();
       }
     }
     end();
