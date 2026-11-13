@@ -38,9 +38,11 @@
   const LINE_HYPHEN = /\p{L}-$/u;
   // Scriptor: _CLOSED — eine Zeile, die einen Satz oder Teilsatz schließt.
   const CLOSED = /[.:;!?]["'’”»)\]]*$/;
+  const LOWER_START = /^\p{Ll}/u;
 
   const PEAK_FRACTION = 0.25;    // Scriptor: calibrate_threshold(peak_fraction)
   const MIN_CALIB_LINES = 8;     // darunter gibt es keinen Gipfel, nur Rauschen
+  const MIN_FEW_LINES = 3;       // darunter auch kein Median, der etwas sagt
   const EDGE_MIN_LINES = 5;      // Scriptor: EDGE_MIN_LINES
   const INDENT_MIN = 1;          // Einzugsband in Zeichen (Scriptor: 4–18 pt)
   const INDENT_MAX = 8;
@@ -80,7 +82,13 @@
 
   /** { threshold, width } — width ist die volle Satzbreite (Gipfel), oder null. */
   function calibrate(lengths) {
-    if (lengths.length < MIN_CALIB_LINES) return null;
+    // Zu wenige Zeilen für ein Histogramm: Scriptors FULL_LINE-Maß, kurz ist,
+    // was unter 80 % der mittleren Zeile bleibt.
+    if (lengths.length < MIN_CALIB_LINES) {
+      if (lengths.length < MIN_FEW_LINES) return null;
+      const width = median(lengths);
+      return { threshold: Math.floor(FULL_LINE * width), width };
+    }
     const max = Math.max(...lengths);
     const raw = new Array(max + 2).fill(0);
     for (const n of lengths) raw[n] += 1;
@@ -215,7 +223,8 @@
       cur = pendingHyphen ? cur + piece : (cur ? cur + " " + piece : piece);
       pendingHyphen = ends;
 
-      if (!ends && cal) {
+      // Ein Absatz beginnt nicht klein: "«la caduta »" / "e che è, piuttosto".
+      if (!ends && cal && !LOWER_START.test(next)) {
         const bare = line.replace(TRAILING_MARKERS, "");
         if (SENT_END.test(bare) && shortTail(bare.length, cal)) end();
       }

@@ -72,6 +72,29 @@ test("Zu kurzer Text: keine Längenregel, nur Leerzeilen", () => {
   assert.deepEqual(splitParagraphs(text), ["Eine Zeile. Noch eine. Und eine dritte."]);
 });
 
+test("Kurzer Abschnitt (unter 8 Zeilen): 80 % der mittleren Zeile", () => {
+  const text = [
+    "Die Frage nach dem Ursprung der griechischen Polis beschäftigt die",
+    "Forschung seit dem neunzehnten Jahrhundert, und sie ist bis heute",
+    "nicht abschließend beantwortet.",
+    "Keine dieser Deutungen ist heute ohne Einschränkung haltbar, denn die",
+    "Befunde der letzten Jahrzehnte zeigen ein weit vielfältigeres Bild.",
+  ].join("\n");
+  assert.equal(splitParagraphs(text).length, 2);
+});
+
+test("Kleinbuchstabe in der nächsten Zeile: kein Absatzende", () => {
+  // Acrobat-Kopie aus Mazzarino: die kurze Zeile endet auf », der Satz läuft weiter.
+  const text = [
+    "Stilicone, era condotto, proprio per salvare l’unità teodosiana del-",
+    "l’impero, a quelle formule di convivenza coi barbari che ne determinarono",
+    "quella che comunemente si suole chiamare «la caduta »",
+    "e che è, piuttosto, il primo accenno di una coscienza politica spiccatamente",
+    "occidentale, e pertanto antibizantina. S’impone perciò la",
+  ].join("\n");
+  assert.equal(splitParagraphs(text).length, 1);
+});
+
 test("detect:false entspricht dem alten Verhalten", () => {
   const text = PARAS.flatMap((p) => wrap(p, 68)).join("\n");
   assert.deepEqual(splitParagraphs(text, { detect: false }), [PARAS.join(" ")]);
@@ -134,7 +157,8 @@ test("Kalibrierung: Schwelle liegt unter dem Gipfel der vollen Zeilen", () => {
   const lengths = [66, 67, 68, 65, 68, 67, 66, 64, 68, 67, 30, 41, 12];
   const t = calibrateThreshold(lengths);
   assert.ok(t > 41 && t < 64, `Schwelle ${t}`);
-  assert.equal(calibrateThreshold([60, 61, 62]), null);
+  assert.equal(calibrateThreshold([60, 61]), null);
+  assert.equal(calibrateThreshold([60, 70, 62]), 49);  // unter 8 Zeilen: 80 % des Medians
 });
 
 test("reflowText trennt mit Leerzeile", () => {
