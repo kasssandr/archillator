@@ -30,11 +30,13 @@
   // Abweichend mit Doppelpunkt: Scriptor erkennt das folgende Blockzitat an der
   // Geometrie, im eingefügten Text steht der einleitende Satz sonst mit ihm in
   // einem Absatz ("Dazu können wir in den Elementi lesen:", Meisel).
-  const SENT_END = /[.:!?»“”"’']$/;
+  // Ein schließendes Anführungszeichen zählt nur hinter dem Satzzeichen, wie
+  // jetzt auch in Scriptor: "known as “New Rome,”" endet keinen Satz.
+  const SENT_END = /[.:!?](\s*[»«“”"’'])*$/;
   const TRAILING_MARKERS = /(\s*\[\d{1,4}\])+$/;
   // Anmerkungsziffer, die die Kopie aus der Hochstellung holt: "Belgian Rome.”2",
   // "disintegrated.4". Nur hinter einem Satzzeichen, damit "in 455" bleibt.
-  const TRAILING_NOTE_NUMBER = /([.!?»“”"’'])\d{1,3}$/;
+  const TRAILING_NOTE_NUMBER = /([.!?»«“”"’'])\d{1,3}$/;
   // Endet eine Zeile so, schließt sie keine Überschrift ab.
   const OPEN_END = /[.,;:!?»“”"’'\-–—(]$/;
   const BULLET_RE = /^[•▪◦‣]\s*\S/;
@@ -43,7 +45,9 @@
   const LINE_HYPHEN = /\p{L}-$/u;
   // Scriptor: _CLOSED — eine Zeile, die einen Satz oder Teilsatz schließt.
   const CLOSED = /[.:;!?]["'’”»)\]]*$/;
-  const LOWER_START = /^\p{Ll}/u;
+  // Nur lateinische Schrift: Griechisch beginnt auch einen neuen Satz klein
+  // (in Scriptor an Kern und Waltzing gemessen).
+  const LOWER_START = /^(?=\p{Script=Latin})\p{Ll}/u;
 
   const PEAK_FRACTION = 0.25;    // Scriptor: calibrate_threshold(peak_fraction)
   const MIN_CALIB_LINES = 8;     // darunter gibt es keinen Gipfel, nur Rauschen

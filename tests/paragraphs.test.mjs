@@ -161,6 +161,18 @@ test("Kurze Zeile ohne Satzzeichen am Absatzanfang ist eine Überschrift", () =>
   assert.deepEqual(splitParagraphs(text), [...PARAS, "Zu viel Geschichte", PARAS[0]]);
 });
 
+test("Schließendes Anführungszeichen ohne Satzzeichen davor endet keinen Satz", () => {
+  const lines = PARAS.flatMap((p) => wrap(p, 68));
+  const text = [...lines, "Die neue Hauptstadt hieß bald „Neues Rom,“", "„Junges Rom.“ Danach kam das Ende."].join("\n");
+  assert.ok(splitParagraphs(text).at(-1).endsWith("„Neues Rom,“ „Junges Rom.“ Danach kam das Ende."));
+});
+
+test("Griechischer Satz nach kurzer Zeile beginnt einen Absatz, auch klein", () => {
+  const lines = PARAS.flatMap((p) => wrap(p, 68));
+  const text = [...lines, "So schreibt es der Historiker selbst.", "ἔπειτα δὲ οὐδὲ ὅσια ταῦτα ἐστίν, ὡς λέγουσιν οἱ πολλοὶ τῶν ἀνθρώπων."].join("\n");
+  assert.equal(splitParagraphs(text).at(-2), "So schreibt es der Historiker selbst.");
+});
+
 test("Aufzählungszeichen öffnet einen Absatz", () => {
   const text = [...PARAS.flatMap((p) => wrap(p, 68)), "Es gibt zwei Fälle, die man unterscheiden muss, und zwar", "• den ersten Fall", "• den zweiten Fall"].join("\n");
   assert.deepEqual(splitParagraphs(text).slice(-3), [
