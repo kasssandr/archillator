@@ -33,6 +33,7 @@ jobs:
         run: |
           test -f index.html || { echo "index.html fehlt im Quell-Repo"; exit 1; }
           test -f js/docx-bridge.js || { echo "js/docx-bridge.js fehlt im Quell-Repo"; exit 1; }
+          test -f js/paragraphs.js || { echo "js/paragraphs.js fehlt im Quell-Repo"; exit 1; }
           test -d website/archillator || { echo "website/archillator/ fehlt im Ziel-Repo"; exit 1; }
 
       - name: Kopieren
@@ -40,6 +41,7 @@ jobs:
           cp index.html website/archillator/index.html
           mkdir -p website/archillator/js
           cp js/docx-bridge.js website/archillator/js/docx-bridge.js
+          cp js/paragraphs.js website/archillator/js/paragraphs.js
 
       # Nur die Website-Kopie bekommt den Stempel; im Quell-Repo steht "local".
       # Faellt der Platzhalter weg, bricht der Lauf ab, statt still ohne Stempel zu deployen.
@@ -56,7 +58,7 @@ jobs:
           cd website
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add archillator/index.html archillator/js/docx-bridge.js
+          git add archillator/index.html archillator/js/docx-bridge.js archillator/js/paragraphs.js
           if git diff --staged --quiet; then
             echo "Keine Aenderung - nichts zu synchronisieren."
           else

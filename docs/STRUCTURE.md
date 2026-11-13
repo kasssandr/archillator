@@ -16,6 +16,7 @@ Stand: Juli 2026 (Branch `chore/structure-cleanup`).
 ```
 index.html          UI + App-Logik (Browser)
 js/docx-bridge.js   DOCX rein/raus ohne Markdown-Umweg
+js/paragraphs.js    Absatzerkennung für PDF-Text (Port aus Scriptor)
 ```
 
 Online: [archilles.org/archillator/](https://archilles.org/archillator/)  
