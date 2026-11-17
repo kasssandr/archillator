@@ -12,7 +12,8 @@ A browser-based translation tool for academic texts, designed for researchers an
 - **Checkpoint System:** Automatic progress saving – resume interrupted translations
 - **Batch Processing:** Translates multiple paragraphs per API call for efficiency
 - **Academic Styles:** Choose between scholarly, neutral, simplified, or literal translation styles
-- **PDF Text Cleaning:** Automatically fixes line breaks, hyphenation, and paragraph spacing when you paste text copied from a PDF
+- **Apparatus-Preserving Translation:** The style *Archilles (scholarly, marker-preserving)* translates a document prepared by [Scriptor](https://github.com/kasssandr/archilles-scriptor) and leaves its footnote anchors, page markers, region markers and protected titles exactly where they are (see [Translating a prepared document](#translating-a-prepared-document))
+- **PDF Text Cleaning:** Automatically fixes line breaks and hyphenation and detects paragraphs when you paste text copied from a PDF
 - **Proofread without Style Changes:** Fix spelling and grammar without unwanted "improvements" (unlike DeepL Write)
 
 ## Quick Start
@@ -99,6 +100,55 @@ One key, many models — including a rotating selection of free ones.
 - **Neutral / general** – Clear, accessible language
 - **Simplified / readable** – Avoids jargon, easier to read
 - **As literal as possible** – Closest to source text structure
+- **Archilles (scholarly, marker-preserving)** – Scholarly register, plus a fixed set of rules that keep the markers of a prepared document in place. For Scriptor-prepared Markdown; see the next section
+
+## Translating a Prepared Document
+
+A *prepared document* is what [archilles-scriptor](https://github.com/kasssandr/archilles-scriptor) makes of a scholarly PDF: Markdown in which every footnote is still attached to its sentence and every page break carries the page number as printed. Translated with an ordinary style, such a text loses exactly that. Models localize `[p. 51]` to `[S. 51]`, translate the titles in the notes, put a plain "see p. 30" in brackets as if it were a marker, and invent note texts where only a reference stands.
+
+The style **Archilles (scholarly, marker-preserving)** is made for these documents.
+
+**Workflow:**
+
+1. In Scriptor, write the translation profile: `scriptor translate-prep book.md --out book.translate.md`. It wraps what is provably bibliographic (URLs, quoted work titles in footnotes) in `<dnt>…</dnt>`.
+2. In Archillator, open **Document mode** and upload `book.translate.md`.
+3. Choose the style **Archilles (scholarly, marker-preserving)** and the target language, then translate.
+4. Download. Markdown in gives Markdown out.
+
+You do not need the briefing file that `translate-prep` writes next to the profile. The style contains its rules. The briefing is for translating the same file somewhere else, in a chat or another tool.
+
+**What stays exactly as it is:**
+
+| Marker | Meaning | What the model does |
+|--------|---------|---------------------|
+| `[^12]` | Footnote reference | Kept, attached to the same word |
+| `[^12]: …` | Footnote definition | Marker and colon kept, the note text translated; never merged into a neighbouring paragraph, never invented |
+| `[p. 51]` | Page marker with the printed page label | Kept, not localized, not renumbered, same position in the sentence. A plain "see p. 30" in the text is not a marker and is translated normally |
+| `[region: bibliography]` | Region marker | Kept on its own line, the name never translated |
+| `<dnt>…</dnt>` | Do not translate: titles, sigla, foreign terms | Tags kept and the text between them reproduced verbatim |
+| `#`, `##` | Headings | Hashes kept, heading text translated |
+| `_…_` | Emphasis | Underscores kept, the text inside translated |
+| `---` block at the top | The document's metadata block | Untouched |
+
+Work titles, proper names and bibliographic references are left verbatim even where they carry no tag, above all inside footnotes. The rule the model is given: when in doubt, do not translate, because bibliographic precision outranks completeness.
+
+**On download** the `<dnt>` tags are removed. They protect titles during translation and are no part of the finished text. While you work they stay visible, so you can see what was protected.
+
+**What the tool does on its own:**
+
+- A footnote definition the model added, although the source paragraph only carries the reference, is dropped. This happens with books whose notes are collected at the end.
+- If a batch comes back with the wrong number of paragraphs, its paragraphs are translated again one by one instead of being assigned by guess.
+- Overload, rate limits and network failures are waited out and retried, with pauses growing from 10 seconds to 5 minutes. A limit that waiting cannot lift (no credit, a daily cap) stops the run at once.
+
+**What to check after a run.** The markers make a translation checkable, so check it:
+
+- Search the output for `[ERROR` and `[CONTENT FILTER`. A paragraph that failed for good is left in the source language under such a line.
+- The footnote references of the translation should be the same set as in the source, and each definition should appear once.
+- The sequence of `[p. …]` markers should be identical to the source's.
+
+**What you get.** A translation in which a citation still resolves: page 51 of the translation is page 51 of the printed book, and note 12 is note 12. The wording belongs to the source; page, occurrence and note number survive.
+
+If you keep prepared documents as bundles in an [Archilles](https://github.com/kasssandr/archilles) library, save the translation somewhere else than the book's bundle folder. A bundle folder with two prepared documents in it is not read at all.
 
 ## Working with Different File Types
 
@@ -108,17 +158,24 @@ One key, many models — including a rotating selection of free ones.
 
 ### DOCX files
 1. Upload DOCX → Tool translates → Downloads as DOCX
-2. Formatting preserved (paragraphs, spacing)
+2. The output is the original file with its text replaced: styles, headings and footnotes stay in place, and italics are carried through the translation
+
+### Markdown files
+Markdown in gives Markdown out, with its syntax intact. For a Scriptor-prepared document use the Archilles style (see [Translating a prepared document](#translating-a-prepared-document)).
 
 ### PDF files
-PDF conversion tools (including Calibre) often produce poor results with broken paragraphs and formatting issues. Instead, use **Passage mode**:
+PDF conversion tools (including Calibre) often produce poor results with broken paragraphs and formatting issues. Two ways around that:
+
+**A whole book:** prepare it with [Scriptor](https://github.com/kasssandr/archilles-scriptor) and translate the result as described above. This is the way to keep footnotes and page numbers.
+
+**A passage:** use **Passage mode**:
 
 1. Copy text from PDF page by page or section by section
 2. Paste into the input field
-3. Mark paragraph breaks manually with double line breaks (empty line)
-4. Use "Clean & Translate"
+3. Use "Clean & Translate"
+4. Check the paragraph breaks in the result; where the detection missed one, insert an empty line in the input and run it again
 
-The tool will automatically fix hyphenation and merge broken lines.
+The tool will automatically fix hyphenation, merge broken lines and detect paragraphs.
 
 ## Checkpoint System
 
@@ -146,7 +203,7 @@ For quick translations of text copied from PDFs or other sources.
 - **Translate only** – Translate without cleaning (for already clean text)
 - **Clean & Translate** – Both operations
 
-**Paragraph handling.** There is no automatic paragraph detection, and that is deliberate — guessing where a paragraph ends is exactly what other tools get wrong. *You* mark the paragraphs by inserting a double line break (an empty line); everything else is treated as one flowing paragraph and joined. How those paragraphs then appear in the output is controlled by the **"Blank lines between paragraphs"** checkbox:
+**Paragraph handling.** With **"Detect paragraphs automatically"** checked (the default), the tool finds paragraphs in pasted PDF text and in TXT files by the rules Scriptor uses, as far as they work without page geometry: a short line that ends a sentence closes a paragraph, a first-line indent or a bullet opens one, and no paragraph begins after a line that ends in a hyphen. An empty line always separates paragraphs. Uncheck the box and only empty lines count: *you* mark the paragraphs, and everything else is joined into one flowing paragraph. How the paragraphs then appear in the output is controlled by the **"Blank lines between paragraphs"** checkbox:
 
 - **Checked** – paragraphs are separated by a blank line (double line break)
 - **Unchecked** – paragraphs are separated by a single line break
@@ -162,8 +219,10 @@ For translating entire books and documents.
 - Upload DOCX, EPUB, TXT, or Markdown files
 - Batch processing (10 paragraphs per API call for efficiency)
 - Automatic checkpoint saving (resume after interruption)
+- Overload, rate limits and network failures are retried with growing pauses instead of leaving the paragraph untranslated
 - Progress tracking with detailed log
-- DOCX output (preserves paragraph structure)
+- DOCX output built from the original file (styles, headings and footnotes kept)
+- The Archilles style for Scriptor-prepared Markdown (see [Translating a prepared document](#translating-a-prepared-document))
 
 **Output formats:**
 - DOCX input → DOCX output
@@ -362,7 +421,7 @@ $env:OLLAMA_ORIGINS="*"; ollama serve
 ## Technical Details
 
 - Pure client-side JavaScript – no server required
-- **Layout:** `index.html` (UI + translation logic) + `js/docx-bridge.js` (DOCX in/out via ZIP clone)
+- **Layout:** `index.html` (UI + translation logic) + `js/docx-bridge.js` (DOCX in/out via ZIP clone) + `js/paragraphs.js` (paragraph detection for PDF text, ported from Scriptor)
 - **JSZip** for DOCX and EPUB as ZIP archives
 - DOCX export keeps the original package structure (styles, footnotes, headings) where possible
 - All processing happens in your browser
@@ -401,25 +460,29 @@ MIT License – free for personal and commercial use.
 |------|------|
 | `index.html` | Web UI and translation orchestration |
 | `js/docx-bridge.js` | Academic DOCX round-trip |
-| `tests/` | Automated tests (mainly the bridge) |
+| `js/paragraphs.js` | Paragraph detection for pasted PDF text |
+| `tests/` | Automated tests (bridge and paragraph detection) |
 | `scripts/` | Helpers (briefing check; optional desktop tool) |
 | `archive/` | Retired designs — not shipped as the product |
 | `docs/STRUCTURE.md` | Product decisions and layout |
 
-Website sync copies `index.html` and `js/docx-bridge.js` to archilles.org. Edit only in **this** repo.
+Website sync copies `index.html` and the two files in `js/` to archilles.org. Edit only in **this** repo.
 
 ## Contributing
 
 Scriptor prepares, Archilles retrieves, Archillator translates — three tools,
 one path: from the printed apparatus to a citable answer, in any language, on
-your own machine. Each tool stands alone; none requires the others. All three
+your own machine. Scriptor and Archillator stand alone. Archilles installs
+Scriptor as a library, because it reads prepared documents through Scriptor's
+own reader instead of keeping a copy of the format. All three
 are developed under one fixed charter: **local-first, source-true, the scholar
 as the acting subject**. Contributions are welcome within that charter; beyond
 it, the license invites forks.
 
 The interchange contract of the family — the *prepared document* — is specified
 in [PREPARED_FORMAT_SPEC](https://github.com/kasssandr/archilles-scriptor/blob/main/docs/PREPARED_FORMAT_SPEC.md);
-for Archillator its §7 (the `<dnt>` convention) is the binding part. Since
+for Archillator its §7 (the `<dnt>` convention) is the binding part; the style
+*Archilles (scholarly, marker-preserving)* is where Archillator keeps it. Since
 version 0.4.0 two more rules bind it. A heading's printed designator (letters,
 digits, roman numerals) is carried over unchanged, while a designator in
 words (`Erstes Kapitel`) is text and is translated; a Pandoc identifier `{#…}`
