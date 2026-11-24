@@ -19,6 +19,8 @@ const checks = [
   ["Regel gegen erfundene Fussnotendefinitionen", /Never ADD a definition that is not in the source/, 1],
   ["Regel gegen Seitenangaben als [p. n]", /plain page reference in the running text/, 1],
   ["Erfundene Definitionen werden entfernt", /function dropInventedNoteDefs\(/, 1],
+  ["Seitenangaben als [p. n] werden zurueckgesetzt", /ArchillatorMarkers\.restorePageRefs\(/, 1],
+  ["markers.js eingebunden", /<script src="js\/markers\.js"><\/script>/, 1],
   ["Falsche Absatzzahl im Batch faellt auf Einzeluebersetzung zurueck", /Paragraph count mismatch/, 1],
   ["Ueberlast wird abgewartet", /async function withRetry\(/, 1],
   ["docx-bridge eingebunden", /<script src="js\/docx-bridge\.js"><\/script>/, 1],
